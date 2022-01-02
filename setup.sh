@@ -17,5 +17,3 @@ opam install       \
   incr_select      \
   ocaml-lsp-server \
   expect_test_helpers_core
-
-
