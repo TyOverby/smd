@@ -26,14 +26,14 @@ let yoink a =
   in
   return
   @@ let%map result = result in
-  result ()
+     result ()
 ;;
 
 let scope_model
-      (type a cmp)
-      (module M : Bonsai.Comparator with type t = a and type comparator_witness = cmp)
-      ~on:v
-      computation
+    (type a cmp)
+    (module M : Bonsai.Comparator with type t = a and type comparator_witness = cmp)
+    ~on:v
+    computation
   =
   let v = Bonsai.Value.map v ~f:(fun k -> Map.singleton (module M) k ()) in
   let%sub map = Bonsai.assoc (module M) v ~f:(fun _ _ -> computation) in
@@ -44,13 +44,13 @@ let scope_model
 ;;
 
 let state_machine1_dynamic_model
-      (type m a)
-      here
-      (module M : Bonsai.Model with type t = m)
-      (module A : Bonsai.Action with type t = a)
-      ~model
-      ~apply_action
-      input
+    (type m a)
+    here
+    (module M : Bonsai.Model with type t = m)
+    (module A : Bonsai.Action with type t = a)
+    ~model
+    ~apply_action
+    input
   =
   let model_creator =
     match model with
@@ -79,8 +79,8 @@ let state_machine1_dynamic_model
   in
   return
   @@ let%map model, inject = model_and_inject
-  and model_creator = model_creator in
-  model_creator model, inject
+     and model_creator = model_creator in
+     model_creator model, inject
 ;;
 
 let state_machine0_dynamic_model here model_mod action_mod ~model ~apply_action =
@@ -208,28 +208,28 @@ let pipe (type a) here (module A : Bonsai.Model with type t = a) =
       ~default_model:Model.default
       ~apply_action:
         (fun ~inject:_ ~schedule_event model -> function
-           | Add_action a ->
-             (match Fdeque.dequeue_front model.queued_receivers with
-              | None ->
-                let queued_actions = Fdeque.enqueue_back model.queued_actions a in
-                { model with queued_actions }
-              | Some (hd, queued_receivers) ->
-                schedule_event (Bonsai.Effect.Private.Callback.respond_to hd a);
-                { model with queued_receivers })
-           | Add_receiver r ->
-             (match Fdeque.dequeue_front model.queued_actions with
-              | None ->
-                let queued_receivers = Fdeque.enqueue_back model.queued_receivers r in
-                { model with queued_receivers }
-              | Some (hd, queued_actions) ->
-                schedule_event (Bonsai.Effect.Private.Callback.respond_to r hd);
-                { model with queued_actions }))
+          | Add_action a ->
+            (match Fdeque.dequeue_front model.queued_receivers with
+            | None ->
+              let queued_actions = Fdeque.enqueue_back model.queued_actions a in
+              { model with queued_actions }
+            | Some (hd, queued_receivers) ->
+              schedule_event (Bonsai.Effect.Private.Callback.respond_to hd a);
+              { model with queued_receivers })
+          | Add_receiver r ->
+            (match Fdeque.dequeue_front model.queued_actions with
+            | None ->
+              let queued_receivers = Fdeque.enqueue_back model.queued_receivers r in
+              { model with queued_receivers }
+            | Some (hd, queued_actions) ->
+              schedule_event (Bonsai.Effect.Private.Callback.respond_to r hd);
+              { model with queued_actions }))
   in
   return
     (let%map inject = inject in
      let request =
        Bonsai.Effect.Private.make ~request:() ~evaluator:(fun r ->
-         inject (Add_receiver r))
+           inject (Add_receiver r))
      in
      (fun a -> inject (Add_action a)), request)
 ;;
@@ -239,8 +239,8 @@ let map_keys = Bonsai.Incr.compute ~f:Ui_incr.Map.keys
 
 let map_merge a b ~f =
   Bonsai.Incr.compute (Bonsai.Value.both a b) ~f:(fun a_and_b ->
-    let%pattern_bind.Ui_incr a, b = a_and_b in
-    Incr_map.merge a b ~f)
+      let%pattern_bind.Ui_incr a, b = a_and_b in
+      Incr_map.merge a b ~f)
 ;;
 
 module Id_gen (T : Int_intf.S) () = struct
@@ -260,13 +260,13 @@ module Id_gen (T : Int_intf.S) () = struct
 end
 
 let mirror
-      (type m)
-      here
-      (module M : Bonsai.Model with type t = m)
-      ~store_set
-      ~store_value
-      ~interactive_set
-      ~interactive_value
+    (type m)
+    here
+    (module M : Bonsai.Model with type t = m)
+    ~store_set
+    ~store_value
+    ~interactive_set
+    ~interactive_value
   =
   let module M2 = struct
     type t =
@@ -290,30 +290,30 @@ let mirror
         Ui_effect.Ignore
       | `Unstable ->
         (match old_pair with
-         | None ->
-           (* on_change' is triggered when the values flow through this node
+        | None ->
+          (* on_change' is triggered when the values flow through this node
               for the first time.  In this scenario, we prioritize the
               value in the store. *)
-           interactive_set store_value
-         | Some { M2.store = old_store_value; interactive = old_interactive_value } ->
-           let store_changed = not ([%equal: M.t] old_store_value store_value) in
-           let interactive_changed =
-             not ([%equal: M.t] old_interactive_value interactive_value)
-           in
-           (match interactive_changed, store_changed with
-            (* if the interactive-value has changed, forward that on to the store.
+          interactive_set store_value
+        | Some { M2.store = old_store_value; interactive = old_interactive_value } ->
+          let store_changed = not ([%equal: M.t] old_store_value store_value) in
+          let interactive_changed =
+            not ([%equal: M.t] old_interactive_value interactive_value)
+          in
+          (match interactive_changed, store_changed with
+          (* if the interactive-value has changed, forward that on to the store.
                we intentionally prioritize the interactive value here, so changes to
                the store that happened at the same instant are dropped. *)
-            | true, _ -> store_set interactive_value
-            (* finally, if the store changed but interactive did not, update the
+          | true, _ -> store_set interactive_value
+          (* finally, if the store changed but interactive did not, update the
                interactive value. *)
-            | false, true -> interactive_set store_value
-            (* this final case should never happen.  Error message explains why.*)
-            | false, false ->
-              eprint_s
-                [%message
-                  "BUG" [%here] "on_change triggered when nothing actually changed?"];
-              Ui_effect.Ignore))
+          | false, true -> interactive_set store_value
+          (* this final case should never happen.  Error message explains why.*)
+          | false, false ->
+            eprint_s
+              [%message
+                "BUG" [%here] "on_change triggered when nothing actually changed?"];
+            Ui_effect.Ignore))
   in
   Bonsai.Edge.on_change'
     here

@@ -26,11 +26,11 @@ module Define (Handler : Handler) :
 
   let () =
     Hashtbl.add_exn handlers ~key ~data:(fun inp ->
-      match inp with
-      | T (C value, callback) ->
-        Handler.handle value;
-        callback ()
-      | _ -> raise_s [%message "Unrecognized variant"])
+        match inp with
+        | T (C value, callback) ->
+          Handler.handle value;
+          callback ()
+        | _ -> raise_s [%message "Unrecognized variant"])
   ;;
 
   let inject v = C v
@@ -44,17 +44,17 @@ module Define1 (Handler : Handler1) :
 
   let () =
     Hashtbl.add_exn handlers ~key ~data:(fun inp ->
-      match inp with
-      | T (C value, callback) ->
-        let called = ref false in
-        let callback a =
-          if !called
-          then failwith "on_response called multiple times!"
-          else called := true;
-          callback a
-        in
-        Handler.handle value ~on_response:callback
-      | _ -> raise_s [%message "Unrecognized variant"])
+        match inp with
+        | T (C value, callback) ->
+          let called = ref false in
+          let callback a =
+            if !called
+            then failwith "on_response called multiple times!"
+            else called := true;
+            callback a
+          in
+          Handler.handle value ~on_response:callback
+        | _ -> raise_s [%message "Unrecognized variant"])
   ;;
 
   let inject v = C v
@@ -67,10 +67,10 @@ let handle_registered_event (T (t, cb)) =
 ;;
 
 module Print_s = Define (struct
-    module Action = Sexp
+  module Action = Sexp
 
-    let handle s = print_s s
-  end)
+  let handle s = print_s s
+end)
 
 let print_s = Print_s.inject
 
@@ -97,15 +97,15 @@ let never = Never
 let of_fun ~f = Fun f
 
 include Core.Monad.Make (struct
-    type nonrec 'a t = 'a t
+  type nonrec 'a t = 'a t
 
-    let return = return
-    let bind = bind
-    let map = `Custom map
-  end)
+  let return = return
+  let bind = bind
+  let map = `Custom map
+end)
 
 let rec eval : type a. a t -> callback:(a -> unit) -> unit =
-  fun t ~callback ->
+ fun t ~callback ->
   match t with
   | Fun f -> f ~callback
   | Ignore -> callback ()
@@ -154,15 +154,15 @@ module Advanced = struct
     end
 
     let make : request:'a -> evaluator:(('a, 'b) Callback.t -> unit t) -> 'b t =
-      fun ~request ~evaluator ->
+     fun ~request ~evaluator ->
       Expert.of_fun ~f:(fun ~callback ->
-        let callback =
-          Callback.make ~request ~on_response:(fun response ->
-            callback response;
-            Ignore)
-        in
-        Expert.handle (evaluator callback))
-    ;;
+          let callback =
+            Callback.make ~request ~on_response:(fun response ->
+                callback response;
+                Ignore)
+          in
+          Expert.handle (evaluator callback))
+   ;;
   end
 
   module For_testing = struct
@@ -234,11 +234,11 @@ module Advanced = struct
 
       let maybe_respond t ~f =
         Bag.filter_inplace t ~f:(fun { query; response } ->
-          match f query with
-          | No_response_yet -> true
-          | Respond resp ->
-            Svar.fill_if_empty response resp;
-            false)
+            match f query with
+            | No_response_yet -> true
+            | Respond resp ->
+              Svar.fill_if_empty response resp;
+              false)
       ;;
     end
 

@@ -32,7 +32,7 @@ type ('model, 'action, 'result) t =
           'input Incr.t
           -> inject:('action -> unit Effect.t)
           -> (schedule_event:(unit Effect.t -> unit) -> 'model -> 'action -> 'model)
-               Incr.t
+             Incr.t
       ; compute :
           Incr.Clock.t
           -> 'input Incr.t

@@ -4,17 +4,17 @@ module Pandoc = Pandoc_ast_jane
 
 let pandoc_path = "pandoc"
 
-let run prog args = 
+let run prog args =
   let command = sprintf "%s %s" prog (String.concat args ~sep:" ") in
   let stdout = Caml_unix.open_process_in command in
   In_channel.input_all stdout
-
+;;
 
 let communicate_with_pandoc ~data ~args =
-  let tmpfile = String.strip (run "mktemp" [] ) in
-  Out_channel.write_all tmpfile ~data ;
+  let tmpfile = String.strip (run "mktemp" []) in
+  Out_channel.write_all tmpfile ~data;
   let args = tmpfile :: args in
-  run "pandoc" args 
+  run "pandoc" args
 ;;
 
 let ast_of_markdown markdown =
@@ -228,12 +228,12 @@ let%expect_test "checkboxe kinds" =
   in
   doc |> Pandoc.to_pandoc_ast_string |> markdown_of_ast |> print_endline;
   (match Pandoc.top_level_blocks doc with
-   | [ BulletList items ] ->
-     items
-     |> List.map ~f:Pandoc.List_item.of_blocks
-     |> List.map ~f:[%sexp_of: Pandoc.List_item.t]
-     |> List.iter ~f:print_s
-   | _ -> assert false);
+  | [ BulletList items ] ->
+    items
+    |> List.map ~f:Pandoc.List_item.of_blocks
+    |> List.map ~f:[%sexp_of: Pandoc.List_item.t]
+    |> List.iter ~f:print_s
+  | _ -> assert false);
   [%expect
     {|
     -
@@ -371,8 +371,11 @@ some inline
 
 markdown
     |}
-  |> ast_of_markdown |> markdown_of_ast |> print_endline;
-  [%expect {|
+  |> ast_of_markdown
+  |> markdown_of_ast
+  |> print_endline;
+  [%expect
+    {|
     this is [ a test ]{.f} of
 
     <div>
@@ -382,3 +385,4 @@ markdown
     </div>
 
     markdown |}]
+;;

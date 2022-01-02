@@ -10,12 +10,12 @@ type t =
 let to_string { choices; depth } =
   let buffer = Buffer.create 10 in
   (match choices with
-   | [] -> ()
-   | choice :: choices ->
-     Buffer.add_string buffer (Int.to_string choice);
-     List.iter choices ~f:(fun choice ->
-       Buffer.add_char buffer '-';
-       Buffer.add_string buffer (Int.to_string choice)));
+  | [] -> ()
+  | choice :: choices ->
+    Buffer.add_string buffer (Int.to_string choice);
+    List.iter choices ~f:(fun choice ->
+        Buffer.add_char buffer '-';
+        Buffer.add_string buffer (Int.to_string choice)));
   Buffer.add_char buffer '_';
   Buffer.add_string buffer (Int.to_string depth);
   Buffer.contents buffer
@@ -41,8 +41,8 @@ let choice_point t n = { choices = t.choices @ [ n ]; depth = 0 }
 let descend t = { t with depth = t.depth + 1 }
 
 include Comparable.Make_binable (struct
-    type nonrec t = t [@@deriving compare, sexp, bin_io]
-  end)
+  type nonrec t = t [@@deriving compare, sexp, bin_io]
+end)
 
 let%test_module _ =
   (module struct

@@ -18,14 +18,14 @@ end
 
 let instrument_computation (t : (_, _, _) Computation.t) ~start_timer ~stop_timer =
   let computation_map
-        (type b c d)
-        ~(recurse : unit Transform.For_computation.mapper)
-        ~var_from_parent:_
-        ~parent_path:_
-        ~current_path
-        ()
-        (computation : (b, c, d) Computation.t)
-    : (b, c, d) Computation.t
+      (type b c d)
+      ~(recurse : unit Transform.For_computation.mapper)
+      ~var_from_parent:_
+      ~parent_path:_
+      ~current_path
+      ()
+      (computation : (b, c, d) Computation.t)
+      : (b, c, d) Computation.t
     =
     let node_info = Graph_info.Node_info.of_computation computation in
     let entry_label node_type =
@@ -85,13 +85,13 @@ let instrument_computation (t : (_, _, _) Computation.t) ~start_timer ~stop_time
     | c -> c
   in
   let value_map
-        (type a)
-        ~(recurse : unit Transform.For_value.mapper)
-        ~var_from_parent:_
-        ~parent_path:_
-        ~current_path
-        ()
-        ({ here; value } as wrapped_value : a Value.t)
+      (type a)
+      ~(recurse : unit Transform.For_value.mapper)
+      ~var_from_parent:_
+      ~parent_path:_
+      ~current_path
+      ()
+      ({ here; value } as wrapped_value : a Value.t)
     =
     let node_info = Graph_info.Node_info.of_value wrapped_value in
     let entry_label =

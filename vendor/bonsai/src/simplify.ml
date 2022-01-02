@@ -73,13 +73,13 @@ end
    which has access to a "key" and "data" (named so because this function
    is only used to simplify an [assoc], which provides both of those values.  *)
 let rec value_to_function
-  : type key data result.
-    result Value.t
-    -> key Type_equal.Id.t
-    -> data Type_equal.Id.t
-    -> (key -> data -> result) Option_or_miss.t
+    : type key data result.
+      result Value.t
+      -> key Type_equal.Id.t
+      -> data Type_equal.Id.t
+      -> (key -> data -> result) Option_or_miss.t
   =
-  fun value key_id data_id ->
+ fun value key_id data_id ->
   let open Option_or_miss in
   match value.value with
   | Constant (r, _) -> Some (fun _key _data -> r)
@@ -87,13 +87,13 @@ let rec value_to_function
   | Named name ->
     let same_name = Type_equal.Id.same_witness in
     (match same_name name key_id, same_name name data_id with
-     | Some T, _ -> Some (fun key _data -> key)
-     | _, Some T -> Some (fun _key data -> data)
-     | None, None ->
-       Miss
-         { free = Free_variables.(add_exn empty ~key:name ~data:())
-         ; gen = (fun env _ _ -> Env.find_exn env name)
-         })
+    | Some T, _ -> Some (fun key _data -> key)
+    | _, Some T -> Some (fun _key data -> data)
+    | None, None ->
+      Miss
+        { free = Free_variables.(add_exn empty ~key:name ~data:())
+        ; gen = (fun env _ _ -> Env.find_exn env name)
+        })
   | Cutoff _ -> None
   | Both (a, b) ->
     let%map a = value_to_function a key_id data_id
@@ -160,20 +160,20 @@ let rec value_to_function
 ;;
 
 let rec computation_to_function
-  : type key data model action result.
-    (model, action, result) Computation.t
-    -> key_id:key Type_equal.Id.t
-    -> data_id:data Type_equal.Id.t
-    -> (Path.t -> key -> data -> result) Option_or_miss.t
+    : type key data model action result.
+      (model, action, result) Computation.t
+      -> key_id:key Type_equal.Id.t
+      -> data_id:data Type_equal.Id.t
+      -> (Path.t -> key -> data -> result) Option_or_miss.t
   =
-  fun computation ~key_id ~data_id ->
+ fun computation ~key_id ~data_id ->
   let recurse = computation_to_function ~key_id ~data_id in
   let handle_subst
-        (type m1 a1 r1 m2 a2 r2)
-        ~(from : (m1, a1, r1) Computation.t)
-        ~via
-        ~(into : (m2, a2, r2) Computation.t)
-    : (Path.t -> key -> data -> r2) Option_or_miss.t
+      (type m1 a1 r1 m2 a2 r2)
+      ~(from : (m1, a1, r1) Computation.t)
+      ~via
+      ~(into : (m2, a2, r2) Computation.t)
+      : (Path.t -> key -> data -> r2) Option_or_miss.t
     =
     match recurse from, recurse into with
     (* This first ignored pattern is _spooky_.  It basically means
@@ -216,7 +216,7 @@ let computation_to_function t ~key_compare ~key_id ~data_id =
   match computation_to_function t ~key_id ~data_id |> Option_or_miss.squash with
   | Some f ->
     Option.some (fun path key data ->
-      let path = Path.append path (Assoc (make_path_element key)) in
-      f path key data)
+        let path = Path.append path (Assoc (make_path_element key)) in
+        f path key data)
   | None | Miss _ -> None
 ;;

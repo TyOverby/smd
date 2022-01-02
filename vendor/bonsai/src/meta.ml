@@ -45,9 +45,9 @@ module Model = struct
   ;;
 
   let map
-        (type k cmp)
-        (module M : Comparator with type t = k and type comparator_witness = cmp)
-        model
+      (type k cmp)
+      (module M : Comparator with type t = k and type comparator_witness = cmp)
+      model
     =
     let sexp_of_model = model.sexp_of in
     let model_of_sexp = model.of_sexp in
@@ -82,9 +82,9 @@ module Action = struct
   ;;
 
   let map
-        (type k cmp)
-        (module M : Comparator with type t = k and type comparator_witness = cmp)
-        action
+      (type k cmp)
+      (module M : Comparator with type t = k and type comparator_witness = cmp)
+      action
     =
     let sexp_of_action = Type_equal.Id.to_sexp action in
     Type_equal.Id.create

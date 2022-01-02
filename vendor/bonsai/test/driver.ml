@@ -26,12 +26,12 @@ type ('i, 'm, 'a, 'r) unpacked =
 type ('i, 'r) t = T : ('i, _, _, 'r) unpacked -> ('i, 'r) t
 
 let create
-      (type i r)
-      ?initial_model_sexp
-      ~clock
-      ~(initial_input : i)
-      (component : (i, r) Bonsai.Arrow_deprecated.t)
-  : (i, r) t
+    (type i r)
+    ?initial_model_sexp
+    ~clock
+    ~(initial_input : i)
+    (component : (i, r) Bonsai.Arrow_deprecated.t)
+    : (i, r) t
   =
   let input_var = Incr.Var.create initial_input in
   let input = Incr.Var.watch input_var in
@@ -39,16 +39,16 @@ let create
   let var = Bonsai.Private.(Value.named fresh |> conceal_value) in
   let computation = component var in
   let (Bonsai.Private.Computation.T
-         { t = component_unpacked
-         ; action
-         ; model =
-             { default = default_model
-             ; sexp_of = sexp_of_model
-             ; equal = _
-             ; type_id = _
-             ; of_sexp = model_of_sexp
-             }
-         })
+        { t = component_unpacked
+        ; action
+        ; model =
+            { default = default_model
+            ; sexp_of = sexp_of_model
+            ; equal = _
+            ; type_id = _
+            ; of_sexp = model_of_sexp
+            }
+        })
     =
     computation |> Bonsai.Private.reveal_computation
   in
@@ -63,10 +63,10 @@ let create
      into the environment is by defining a function like this. See
      https://github.com/ocaml/ocaml/issues/7074. *)
   let create_polymorphic
-        (type a)
-        (computation : (_, a, r) Bonsai.Private.Computation.t)
-        (_action : a Type_equal.Id.t)
-    : (i, r) t
+      (type a)
+      (computation : (_, a, r) Bonsai.Private.Computation.t)
+      (_action : a Type_equal.Id.t)
+      : (i, r) t
     =
     let queue = Queue.create () in
     let module A =

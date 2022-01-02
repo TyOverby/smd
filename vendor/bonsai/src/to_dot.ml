@@ -114,19 +114,19 @@ let arrow_from_many state ~to_ l =
 ;;
 
 let register_named : type a. State.t -> Kind.t -> a Type_equal.Id.t -> Id.t =
-  fun state shape name ->
+ fun state shape name ->
   let name = Type_equal.Id.uid name in
   Hashtbl.find_or_add state.State.type_id_to_name name ~default:(fun () ->
-    register state shape "named")
+      register state shape "named")
 ;;
 
 let register_const state shape id =
   Hashtbl.find_or_add state.State.const_id_to_name id ~default:(fun () ->
-    register state shape "const")
+      register state shape "const")
 ;;
 
 let rec follow_value : type a. State.t -> a Value.t -> Id.t =
-  fun state { value; here } ->
+ fun state { value; here } ->
   let register s = register state (Kind.Value { kind = s; here }) s in
   let register_const = register_const state (Kind.Value { kind = "const"; here }) in
   match value with
@@ -278,9 +278,9 @@ let rec follow_value : type a. State.t -> a Value.t -> Id.t =
 ;;
 
 let rec follow_computation
-  : type model action result. State.t -> (model, action, result) Computation.t -> Id.t
+    : type model action result. State.t -> (model, action, result) Computation.t -> Id.t
   =
-  fun state computation ->
+ fun state computation ->
   let register_computation kind = register state (Kind.Computation kind) kind in
   match computation with
   | Return value ->
@@ -295,59 +295,59 @@ let rec follow_computation
   | Leaf1 { input; kind; name; _ } ->
     let me = register state (Kind.Leaf { kind; name }) "leaf" in
     (match input.value with
-     | Value.Constant _ -> me
-     | Value.Map2 { t1; t2; f = _ } ->
-       arrow_from_many state [ follow_value state t1; follow_value state t2 ] ~to_:me
-     | Value.Map3 { t1; t2; t3; f = _ } ->
-       arrow_from_many
-         state
-         [ follow_value state t1; follow_value state t2; follow_value state t3 ]
-         ~to_:me
-     | Value.Map4 { t1; t2; t3; t4; f = _ } ->
-       arrow_from_many
-         state
-         [ follow_value state t1
-         ; follow_value state t2
-         ; follow_value state t3
-         ; follow_value state t4
-         ]
-         ~to_:me
-     | Value.Map5 { t1; t2; t3; t4; t5; f = _ } ->
-       arrow_from_many
-         state
-         [ follow_value state t1
-         ; follow_value state t2
-         ; follow_value state t3
-         ; follow_value state t4
-         ; follow_value state t5
-         ]
-         ~to_:me
-     | Value.Map6 { t1; t2; t3; t4; t5; t6; f = _ } ->
-       arrow_from_many
-         state
-         [ follow_value state t1
-         ; follow_value state t2
-         ; follow_value state t3
-         ; follow_value state t4
-         ; follow_value state t5
-         ; follow_value state t6
-         ]
-         ~to_:me
-     | Value.Map7 { t1; t2; t3; t4; t5; t6; t7; f = _ } ->
-       arrow_from_many
-         state
-         [ follow_value state t1
-         ; follow_value state t2
-         ; follow_value state t3
-         ; follow_value state t4
-         ; follow_value state t5
-         ; follow_value state t6
-         ; follow_value state t7
-         ]
-         ~to_:me
-     | _ ->
-       arrow state ~from:(follow_value state input) ~to_:me;
-       me)
+    | Value.Constant _ -> me
+    | Value.Map2 { t1; t2; f = _ } ->
+      arrow_from_many state [ follow_value state t1; follow_value state t2 ] ~to_:me
+    | Value.Map3 { t1; t2; t3; f = _ } ->
+      arrow_from_many
+        state
+        [ follow_value state t1; follow_value state t2; follow_value state t3 ]
+        ~to_:me
+    | Value.Map4 { t1; t2; t3; t4; f = _ } ->
+      arrow_from_many
+        state
+        [ follow_value state t1
+        ; follow_value state t2
+        ; follow_value state t3
+        ; follow_value state t4
+        ]
+        ~to_:me
+    | Value.Map5 { t1; t2; t3; t4; t5; f = _ } ->
+      arrow_from_many
+        state
+        [ follow_value state t1
+        ; follow_value state t2
+        ; follow_value state t3
+        ; follow_value state t4
+        ; follow_value state t5
+        ]
+        ~to_:me
+    | Value.Map6 { t1; t2; t3; t4; t5; t6; f = _ } ->
+      arrow_from_many
+        state
+        [ follow_value state t1
+        ; follow_value state t2
+        ; follow_value state t3
+        ; follow_value state t4
+        ; follow_value state t5
+        ; follow_value state t6
+        ]
+        ~to_:me
+    | Value.Map7 { t1; t2; t3; t4; t5; t6; t7; f = _ } ->
+      arrow_from_many
+        state
+        [ follow_value state t1
+        ; follow_value state t2
+        ; follow_value state t3
+        ; follow_value state t4
+        ; follow_value state t5
+        ; follow_value state t6
+        ; follow_value state t7
+        ]
+        ~to_:me
+    | _ ->
+      arrow state ~from:(follow_value state input) ~to_:me;
+      me)
   | Leaf_incr _ -> register_computation "leaf_incr"
   | Path -> register_computation "path"
   | Lifecycle v ->
@@ -389,7 +389,7 @@ let rec follow_computation
     let me = register_computation "switch" in
     arrow state ~from:(follow_value state match_) ~to_:me;
     Map.iter arms ~f:(fun (Computation.T { t; _ }) ->
-      arrow state ~from:(follow_computation state t) ~to_:me);
+        arrow state ~from:(follow_computation state t) ~to_:me);
     me
   | Lazy _ -> register_computation "lazy"
   | Wrap { inner; model_id = _; inject_id = _; apply_action = _ } ->

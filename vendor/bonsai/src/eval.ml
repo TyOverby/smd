@@ -17,10 +17,10 @@ let raise_duplicate_path path =
 ;;
 
 let merge_lifecycles
-  :  Lifecycle.Collection.t Incr.t -> Lifecycle.Collection.t Incr.t
+    :  Lifecycle.Collection.t Incr.t -> Lifecycle.Collection.t Incr.t
     -> Lifecycle.Collection.t Incr.t
   =
-  fun a b ->
+ fun a b ->
   Incr_map.merge a b ~f:(fun ~key -> function
     | `Both _ -> raise_duplicate_path key
     | `Left a -> Some a
@@ -30,9 +30,9 @@ let merge_lifecycles
 let unzip3_mapi' map ~f =
   let first, second_and_third =
     Incr_map.unzip_mapi' map ~f:(fun ~key ~data ->
-      let a, b, c = f ~key ~data in
-      let bc = Incr.both b c in
-      a, bc)
+        let a, b, c = f ~key ~data in
+        let bc = Incr.both b c in
+        a, bc)
   in
   let second, third = Incr_map.unzip second_and_third in
   first, second, third
@@ -41,16 +41,16 @@ let unzip3_mapi' map ~f =
 let unit_model = Incr.return ()
 
 let rec eval
-  : type model action result.
-    environment:Environment.t
-    -> path:Path.t
-    -> clock:Incr.Clock.t
-    -> model:model Incr.t
-    -> inject:(action -> unit Effect.t)
-    -> (model, action, result) Computation.t
-    -> (model, action, result) Snapshot.t
+    : type model action result.
+      environment:Environment.t
+      -> path:Path.t
+      -> clock:Incr.Clock.t
+      -> model:model Incr.t
+      -> inject:(action -> unit Effect.t)
+      -> (model, action, result) Computation.t
+      -> (model, action, result) Snapshot.t
   =
-  fun ~environment ~path ~clock ~model ~inject computation ->
+ fun ~environment ~path ~clock ~model ~inject computation ->
   match computation with
   | Return var ->
     let result = Value.eval environment var in
@@ -165,20 +165,20 @@ let rec eval
     let create_keyed = unstage (Path.Elem.keyed ~compare:key_compare key_id) in
     let results_map, apply_action_map, lifecycle_map =
       unzip3_mapi' input_and_models_map ~f:(fun ~key ~data:input_and_model ->
-        let path = Path.append path Path.Elem.(Assoc (create_keyed key)) in
-        let%pattern_bind value, model = input_and_model in
-        let environment =
-          (* It is safe to reuse the same [key_id] and [data_id] for each pair in the map,
+          let path = Path.append path Path.Elem.(Assoc (create_keyed key)) in
+          let%pattern_bind value, model = input_and_model in
+          let environment =
+            (* It is safe to reuse the same [key_id] and [data_id] for each pair in the map,
              since they all start with a fresh "copy" of the outer environment. *)
-          environment
-          |> Environment.add_exn ~key:key_id ~data:(Incr.const key)
-          |> Environment.add_exn ~key:data_id ~data:value
-        in
-        let inject action = inject (key, action) in
-        let snapshot = eval ~environment ~path ~clock ~inject ~model by in
-        ( Snapshot.result snapshot
-        , Snapshot.(Apply_action.to_incremental (apply_action snapshot))
-        , Snapshot.lifecycle_or_empty snapshot ))
+            environment
+            |> Environment.add_exn ~key:key_id ~data:(Incr.const key)
+            |> Environment.add_exn ~key:data_id ~data:value
+          in
+          let inject action = inject (key, action) in
+          let snapshot = eval ~environment ~path ~clock ~inject ~model by in
+          ( Snapshot.result snapshot
+          , Snapshot.(Apply_action.to_incremental (apply_action snapshot))
+          , Snapshot.lifecycle_or_empty snapshot ))
     in
     let apply_action =
       let%mapn apply_action_map = apply_action_map in
@@ -211,8 +211,8 @@ let rec eval
         ~init:Path.Map.empty
         ~add:(fun ~outer_key:_ ~inner_key:key ~data acc ->
           Path.Map.update acc key ~f:(function
-            | Some _ -> raise_duplicate_path key
-            | None -> data))
+              | Some _ -> raise_duplicate_path key
+              | None -> data))
         ~remove:(fun ~outer_key:_ ~inner_key:key ~data:_ acc -> Path.Map.remove acc key)
     in
     let apply_action = Snapshot.Apply_action.incremental apply_action in
@@ -235,11 +235,11 @@ let rec eval
       let (T { t; model = model_info; action = action_info }) = Map.find_exn arms index in
       let chosen_model =
         Incremental.map model ~f:(fun map ->
-          let (Hidden.Model.T { model; info; t_of_sexp = _ }) =
-            Hidden.Multi_model.find_exn map index
-          in
-          let equal = Type_equal.Id.same_witness_exn info.type_id model_info.type_id in
-          Type_equal.conv equal model)
+            let (Hidden.Model.T { model; info; t_of_sexp = _ }) =
+              Hidden.Multi_model.find_exn map index
+            in
+            let equal = Type_equal.Id.same_witness_exn info.type_id model_info.type_id in
+            Type_equal.conv equal model)
       in
       let inject action =
         inject (Hidden.Action.T { action; type_id = action_info; key = index })
@@ -250,8 +250,8 @@ let rec eval
           Snapshot.(Apply_action.to_incremental (apply_action snapshot))
         in
         fun ~schedule_event
-          model
-          (Hidden.Action.T { action; type_id = action_type_id; key = index' }) ->
+            model
+            (Hidden.Action.T { action; type_id = action_type_id; key = index' }) ->
           let (T { model = chosen_model; info = chosen_model_info; _ }) =
             Hidden.Multi_model.find_exn model index
           in

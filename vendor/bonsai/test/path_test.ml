@@ -23,8 +23,8 @@ let assert_path_unique_id_is_alpha path =
   let unique_id = Path.to_unique_identifier_string path in
   assert (
     String.for_all unique_id ~f:(function
-      | 'a' .. 'z' | '_' -> true
-      | _ -> false))
+        | 'a' .. 'z' | '_' -> true
+        | _ -> false))
 ;;
 
 let%test_unit "all the values are alpha" =

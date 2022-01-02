@@ -6,6 +6,7 @@
  * test is a good canary.
  *)
 open Common
+
 open Notty_unix
 
-let () = Images.[i3; i5; checker1] |> List.map eol |> List.iter output_image
+let () = Images.[ i3; i5; checker1 ] |> List.map eol |> List.iter output_image

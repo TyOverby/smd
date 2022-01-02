@@ -7,20 +7,24 @@
  * Demonstrates interaction.
  *)
 open Notty
+
 open Common
 
 let fg = A.(fg magenta)
 
 let () =
-  simpleterm ~s:1
-    ~f:(fun s -> function
-      | `Key (`ASCII 'q', _) -> None
-      | `Key (`Arrow a, _) ->
-        ( match a with
+  simpleterm
+    ~s:1
+    ~f:
+      (fun s -> function
+        | `Key (`ASCII 'q', _) -> None
+        | `Key (`Arrow a, _) ->
+          (match a with
           | `Up | `Left -> Some (max 1 (s - 1))
-          | `Down | `Right -> Some (min 10 (s + 1)) )
-      | _ -> Some s)
-    ~imgf:I.(fun _ s ->
-      string (string_of_int s) <->
-      (Images.sierp s |> attr fg |> pad ~l:2 ~t:1)
-    )
+          | `Down | `Right -> Some (min 10 (s + 1)))
+        | _ -> Some s)
+    ~imgf:
+      I.(
+        fun _ s ->
+          string (string_of_int s) <-> (Images.sierp s |> attr fg |> pad ~l:2 ~t:1))
+;;

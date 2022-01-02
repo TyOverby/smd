@@ -13,8 +13,8 @@ end
 
 let apply_action ~inject ~schedule_event _ _ new_page =
   (match new_page with
-   | Choice.Homepage | Search_results -> ()
-   | Loading -> schedule_event (inject Choice.Search_results));
+  | Choice.Homepage | Search_results -> ()
+  | Loading -> schedule_event (inject Choice.Search_results));
   new_page
 ;;
 

@@ -371,7 +371,6 @@ val assoc
   -> f:('key Value.t -> 'data Value.t -> 'result Computation.t)
   -> ('key, 'result, 'cmp) Map.t Computation.t
 
-
 (** [enum] is used for matching on a value and providing different behaviors on different
     values.  The type of the value must be enumerable (there must be a finite number of
     possible values), and it must be comparable and sexpable.
@@ -691,5 +690,5 @@ end
 module Arrow_deprecated : sig
   include
     Legacy_api_intf.S
-    with type ('input, 'result) t = 'input Value.t -> 'result Computation.t
+      with type ('input, 'result) t = 'input Value.t -> 'result Computation.t
 end

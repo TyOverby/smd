@@ -60,16 +60,16 @@ let%expect_test "enum" =
         | false -> Tuple2.get2 @>> Bonsai.Arrow_deprecated.pure ~f:(sprintf "false %d"))
   in
   run_test ~component ~initial_input:(true, 5) ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) = Helpers.make_string ~driver in
-    H.show ();
-    [%expect {| true 5 |}];
-    H.set_input (true, 10);
-    [%expect {| true 10 |}];
-    H.set_input (false, 10);
-    [%expect {| false 10 |}];
-    H.set_input (false, 5);
-    [%expect {| false 5 |}])
+      [%expect {| |}];
+      let (module H) = Helpers.make_string ~driver in
+      H.show ();
+      [%expect {| true 5 |}];
+      H.set_input (true, 10);
+      [%expect {| true 10 |}];
+      H.set_input (false, 10);
+      [%expect {| false 10 |}];
+      H.set_input (false, 5);
+      [%expect {| false 5 |}])
 ;;
 
 let%expect_test "enum with action handling `Warn" =
@@ -96,9 +96,9 @@ let%expect_test "enum with action handling `Warn" =
                    >>| Tuple2.map_fst ~f:(sprintf "counter %s")
                  | true ->
                    Bonsai.Arrow_deprecated.pure ~f:(fun s ->
-                     let view = sprintf "pure %s" s in
-                     let inj _ = failwith "can't raise actions out of this one" in
-                     view, inj)))
+                       let view = sprintf "pure %s" s in
+                       let inj _ = failwith "can't raise actions out of this one" in
+                       view, inj)))
     in
     ( result
     , function
@@ -106,29 +106,29 @@ let%expect_test "enum with action handling `Warn" =
       | Inner a -> inject_inner a )
   in
   run_test ~component ~initial_input:() ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) = Helpers.make_string_with_inject ~driver in
-    H.show ();
-    [%expect "counter 0"];
-    H.do_actions [ Inner Increment ];
-    [%expect "counter 1"];
-    H.do_actions [ Inner Increment ];
-    [%expect "counter 2"];
-    H.do_actions [ Outer Increment ];
-    [%expect "counter 2"];
-    H.do_actions
-      [ Outer Increment
-      (* The inner action is ignored.  You can see this because it prints "counter 2"
+      [%expect {| |}];
+      let (module H) = Helpers.make_string_with_inject ~driver in
+      H.show ();
+      [%expect "counter 0"];
+      H.do_actions [ Inner Increment ];
+      [%expect "counter 1"];
+      H.do_actions [ Inner Increment ];
+      [%expect "counter 2"];
+      H.do_actions [ Outer Increment ];
+      [%expect "counter 2"];
+      H.do_actions
+        [ Outer Increment
+          (* The inner action is ignored.  You can see this because it prints "counter 2"
          when it gets focus again. *)
-      ; Inner Increment
-      ];
-    [%expect
-      {|
+        ; Inner Increment
+        ];
+      [%expect
+        {|
       ("an action inside of Bonsai.switch as been dropped because the computation is no longer active"
        (index 1) (action (First Increment)))
       pure 3|}];
-    H.do_actions [ Outer Increment ];
-    [%expect "counter 2"])
+      H.do_actions [ Outer Increment ];
+      [%expect "counter 2"])
 ;;
 
 let%expect_test "constant component" =
@@ -171,23 +171,23 @@ let%expect_test "state-machine counter-component" =
         ~default_model:0
         ~apply_action:
           (fun ~inject:_ ~schedule_event:_ () model -> function
-             | Increment -> model + 1
-             | Decrement -> model - 1)
+            | Increment -> model + 1
+            | Decrement -> model - 1)
     in
     Int.to_string model, inject
   in
   run_test ~component ~initial_input:() ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) = Helpers.make_string_with_inject ~driver in
-    H.show ();
-    [%expect "0"];
-    H.do_actions [ Increment ];
-    [%expect "1"];
-    H.do_actions [ Decrement ];
-    [%expect "0"];
-    (* Increment and decrement in the same cycle should cancel out *)
-    H.do_actions [ Increment; Decrement ];
-    [%expect "0"])
+      [%expect {| |}];
+      let (module H) = Helpers.make_string_with_inject ~driver in
+      H.show ();
+      [%expect "0"];
+      H.do_actions [ Increment ];
+      [%expect "1"];
+      H.do_actions [ Decrement ];
+      [%expect "0"];
+      (* Increment and decrement in the same cycle should cancel out *)
+      H.do_actions [ Increment; Decrement ];
+      [%expect "0"])
 ;;
 
 let%expect_test "basic Same_model let syntax" =
@@ -201,14 +201,14 @@ let%expect_test "basic Same_model let syntax" =
     sprintf "%d | %s" a_side b_side, inject_b
   in
   run_test ~component ~initial_input:() ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) = Helpers.make_string_with_inject ~driver in
-    H.show ();
-    [%expect {| 5 | 0 |}];
-    H.do_actions [ Increment ];
-    [%expect {| 5 | 1 |}];
-    H.do_actions [ Decrement ];
-    [%expect {| 5 | 0 |}])
+      [%expect {| |}];
+      let (module H) = Helpers.make_string_with_inject ~driver in
+      H.show ();
+      [%expect {| 5 | 0 |}];
+      H.do_actions [ Increment ];
+      [%expect {| 5 | 1 |}];
+      H.do_actions [ Decrement ];
+      [%expect {| 5 | 0 |}])
 ;;
 
 let%expect_test "module project field" =
@@ -233,14 +233,14 @@ let%expect_test "module project field" =
       | Second b -> inject_b b )
   in
   run_test ~component ~initial_input:() ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) = Helpers.make_string_with_inject ~driver in
-    H.show ();
-    [%expect {| 0 | 0 |}];
-    H.do_actions [ First Increment ];
-    [%expect {| 1 | 0 |}];
-    H.do_actions [ Second Decrement ];
-    [%expect {| 1 | -1 |}])
+      [%expect {| |}];
+      let (module H) = Helpers.make_string_with_inject ~driver in
+      H.show ();
+      [%expect {| 0 | 0 |}];
+      H.do_actions [ First Increment ];
+      [%expect {| 1 | 0 |}];
+      H.do_actions [ Second Decrement ];
+      [%expect {| 1 | -1 |}])
 ;;
 
 let%expect_test "incremental fn constructor" =
@@ -248,24 +248,24 @@ let%expect_test "incremental fn constructor" =
     Bonsai.Arrow_deprecated.With_incr.pure
       ~f:
         (Incr_map.mapi ~f:(fun ~key:_ ~data ->
-           print_endline "doing math";
-           data + 1))
+             print_endline "doing math";
+             data + 1))
   in
   let initial_input = [ 0, 0; 1, 1; 2, 2 ] |> Int.Map.of_alist_exn in
   run_test ~component ~initial_input ~f:(fun driver ->
-    [%expect {|
+      [%expect {|
       doing math
       doing math
       doing math |}];
-    let (module H) = Helpers.make ~driver ~sexp_of_result:[%sexp_of: int Int.Map.t] in
-    H.show ();
-    [%expect {|
+      let (module H) = Helpers.make ~driver ~sexp_of_result:[%sexp_of: int Int.Map.t] in
+      H.show ();
+      [%expect {|
       ((0 1)
        (1 2)
        (2 3)) |}];
-    H.set_input (Int.Map.add_exn initial_input ~key:3 ~data:3);
-    [%expect
-      {|
+      H.set_input (Int.Map.add_exn initial_input ~key:3 ~data:3);
+      [%expect
+        {|
       doing math
       ((0 1)
        (1 2)
@@ -300,13 +300,13 @@ let%expect_test "schedule event from outside of the component" =
       ~default_model:()
   in
   run_test ~component ~initial_input:() ~f:(fun driver ->
-    [%expect {| |}];
-    [%expect {||}];
-    let (module H) =
-      Helpers.make_with_inject ~driver ~sexp_of_result:[%sexp_of: unit]
-    in
-    H.do_actions [ Trigger ];
-    [%expect {|
+      [%expect {| |}];
+      [%expect {||}];
+      let (module H) =
+        Helpers.make_with_inject ~driver ~sexp_of_result:[%sexp_of: unit]
+      in
+      H.do_actions [ Trigger ];
+      [%expect {|
       External event: hello world
       () |}])
 ;;
@@ -344,13 +344,13 @@ let%expect_test "schedule many events from outside of the component" =
       ~default_model:()
   in
   run_test ~component ~initial_input:() ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) =
-      Helpers.make_with_inject ~driver ~sexp_of_result:[%sexp_of: unit]
-    in
-    H.do_actions [ Trigger ];
-    [%expect
-      {|
+      [%expect {| |}];
+      let (module H) =
+        Helpers.make_with_inject ~driver ~sexp_of_result:[%sexp_of: unit]
+      in
+      H.do_actions [ Trigger ];
+      [%expect
+        {|
       External event: hello world
       External event: goodbye world
       () |}])
@@ -389,18 +389,18 @@ let%expect_test "model cutoff" =
     |> Bonsai.Arrow_deprecated.With_incr.model_cutoff
   in
   run_test ~component ~initial_input:() ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) = Helpers.make_string_with_inject ~driver in
-    H.show ();
-    [%expect "0"];
-    H.do_actions [ () ];
-    [%expect "1"];
-    H.do_actions [ () ];
-    [%expect "2"];
-    H.do_actions [ () ];
-    [%expect "3"];
-    H.do_actions [ () ];
-    [%expect "3"])
+      [%expect {| |}];
+      let (module H) = Helpers.make_string_with_inject ~driver in
+      H.show ();
+      [%expect "0"];
+      H.do_actions [ () ];
+      [%expect "1"];
+      H.do_actions [ () ];
+      [%expect "2"];
+      H.do_actions [ () ];
+      [%expect "3"];
+      H.do_actions [ () ];
+      [%expect "3"])
 ;;
 
 let%expect_test "value cutoff" =
@@ -413,16 +413,16 @@ let%expect_test "value cutoff" =
     >>> Bonsai.Arrow_deprecated.pure ~f:Int.to_string
   in
   run_test ~component ~initial_input:1 ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) = Helpers.make_string ~driver in
-    H.show ();
-    [%expect "1"];
-    H.set_input 5;
-    [%expect "1"];
-    H.set_input 6;
-    [%expect "6"];
-    H.set_input 2;
-    [%expect "6"])
+      [%expect {| |}];
+      let (module H) = Helpers.make_string ~driver in
+      H.show ();
+      [%expect "1"];
+      H.set_input 5;
+      [%expect "1"];
+      H.set_input 6;
+      [%expect "6"];
+      H.set_input 2;
+      [%expect "6"])
 ;;
 
 let%expect_test "input" =
@@ -443,7 +443,7 @@ let%expect_test "input" =
 
     let apply_action ~inject:_ ~schedule_event:_ _words model : Action.t -> Model.t
       = function
-        | Increment -> model + 1
+      | Increment -> model + 1
     ;;
 
     let compute ~inject words m =
@@ -459,24 +459,24 @@ let%expect_test "input" =
   in
   let initial_input = [] in
   run_test ~component ~initial_input ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) =
-      Helpers.make_with_inject ~driver ~sexp_of_result:[%sexp_of: int * string list]
-    in
-    H.show ();
-    [%expect {| (0 ()) |}];
-    H.set_input [ "a"; "b"; "c"; "aa"; "bbb"; "cccc" ];
-    [%expect {| (0 ()) |}];
-    H.do_actions [ Words_counter_component.Action.Increment ];
-    [%expect {| (1 (a b c)) |}];
-    H.do_actions [ Words_counter_component.Action.Increment ];
-    [%expect {| (2 (aa)) |}];
-    H.do_actions [ Words_counter_component.Action.Increment ];
-    [%expect {| (3 (bbb)) |}];
-    H.do_actions [ Words_counter_component.Action.Increment ];
-    [%expect {| (4 (cccc)) |}];
-    H.set_input [ "aaaa"; "bbbb" ];
-    [%expect {| (4 (aaaa bbbb)) |}])
+      [%expect {| |}];
+      let (module H) =
+        Helpers.make_with_inject ~driver ~sexp_of_result:[%sexp_of: int * string list]
+      in
+      H.show ();
+      [%expect {| (0 ()) |}];
+      H.set_input [ "a"; "b"; "c"; "aa"; "bbb"; "cccc" ];
+      [%expect {| (0 ()) |}];
+      H.do_actions [ Words_counter_component.Action.Increment ];
+      [%expect {| (1 (a b c)) |}];
+      H.do_actions [ Words_counter_component.Action.Increment ];
+      [%expect {| (2 (aa)) |}];
+      H.do_actions [ Words_counter_component.Action.Increment ];
+      [%expect {| (3 (bbb)) |}];
+      H.do_actions [ Words_counter_component.Action.Increment ];
+      [%expect {| (4 (cccc)) |}];
+      H.set_input [ "aaaa"; "bbbb" ];
+      [%expect {| (4 (aaaa bbbb)) |}])
 ;;
 
 let%expect_test "compose, pure" =
@@ -485,12 +485,12 @@ let%expect_test "compose, pure" =
   let component_b = Bonsai.Arrow_deprecated.pure ~f:(fun input -> input + 2) in
   let component = component_a >>> component_b in
   run_test ~component ~initial_input:0 ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) = Helpers.make ~driver ~sexp_of_result:[%sexp_of: int] in
-    H.show ();
-    [%expect "2"];
-    H.set_input 11;
-    [%expect "3"])
+      [%expect {| |}];
+      let (module H) = Helpers.make ~driver ~sexp_of_result:[%sexp_of: int] in
+      H.show ();
+      [%expect "2"];
+      H.set_input 11;
+      [%expect "3"])
 ;;
 
 let%expect_test "pure_incr" =
@@ -498,16 +498,16 @@ let%expect_test "pure_incr" =
   let component_a = Bonsai.Arrow_deprecated.pure ~f:(fun model -> model mod 5) in
   let component_b =
     Bonsai.Arrow_deprecated.With_incr.pure ~f:(fun input ->
-      Incr.map input ~f:(fun i -> i + 2))
+        Incr.map input ~f:(fun i -> i + 2))
   in
   let component = component_a >>> component_b in
   run_test ~component ~initial_input:0 ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) = Helpers.make ~driver ~sexp_of_result:[%sexp_of: int] in
-    H.show ();
-    [%expect "2"];
-    H.set_input 11;
-    [%expect "3"])
+      [%expect {| |}];
+      let (module H) = Helpers.make ~driver ~sexp_of_result:[%sexp_of: int] in
+      H.show ();
+      [%expect "2"];
+      H.set_input 11;
+      [%expect "3"])
 ;;
 
 let%expect_test "input projection" =
@@ -516,12 +516,12 @@ let%expect_test "input projection" =
     String.length @>> Bonsai.Arrow_deprecated.pure ~f:(fun input -> input + 1)
   in
   run_test ~component ~initial_input:"hi" ~f:(fun driver ->
-    [%expect {| |}];
-    let (module H) = Helpers.make ~driver ~sexp_of_result:[%sexp_of: int] in
-    H.show ();
-    [%expect "3"];
-    H.set_input "hello";
-    [%expect "6"])
+      [%expect {| |}];
+      let (module H) = Helpers.make ~driver ~sexp_of_result:[%sexp_of: int] in
+      H.show ();
+      [%expect "3"];
+      H.set_input "hello";
+      [%expect "6"])
 ;;
 
 let%expect_test "assoc on input" =
@@ -637,7 +637,7 @@ module _ = struct
                  [%of_sexp: bool]
                  ~then_:
                    (Fn.ignore @>> dummy (module Int) ~default:0
-                    >>| Tuple2.map_snd ~f:(fun inject s -> s |> int_of_string |> inject))
+                   >>| Tuple2.map_snd ~f:(fun inject s -> s |> int_of_string |> inject))
                  ~else_:(Fn.ignore @>> dummy (module String) ~default:"world"))
       in
       let inject = function

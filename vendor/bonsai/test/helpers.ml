@@ -6,12 +6,12 @@ include Helpers_intf
 let sexp_to_string = Expect_test_helpers_core.sexp_to_string
 
 let make_generic
-      (type input action result s)
-      ~(driver : (input, s) Driver.t)
-      ~(string_of_result : result -> string)
-      ~(get_result : s -> result)
-      ~(schedule_action : s -> action -> unit)
-  : (module S with type input = input and type action = action)
+    (type input action result s)
+    ~(driver : (input, s) Driver.t)
+    ~(string_of_result : result -> string)
+    ~(get_result : s -> result)
+    ~(schedule_action : s -> action -> unit)
+    : (module S with type input = input and type action = action)
   =
   (module struct
     type nonrec input = input

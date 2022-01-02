@@ -90,10 +90,10 @@ end
 
 type ('input, 'model, 'action, 'result) component_s =
   (module Component_s
-    with type Input.t = 'input
-     and type Model.t = 'model
-     and type Action.t = 'action
-     and type Result.t = 'result)
+     with type Input.t = 'input
+      and type Model.t = 'model
+      and type Action.t = 'action
+      and type Result.t = 'result)
 
 (** This module type is similar to {!Component_s}, except that many of the functions'
     arguments and return values are incremental.  See {!Component_s} for an explanation of
@@ -116,7 +116,7 @@ module type Component_s_incr = sig
     :  Input.t Incr.t
     -> inject:(Action.t -> unit Ui_effect.t)
     -> (schedule_event:(unit Ui_effect.t -> unit) -> Model.t -> Action.t -> Model.t)
-         Incr.t
+       Incr.t
 
   val compute
     :  Input.t Incr.t
@@ -127,10 +127,10 @@ end
 
 type ('input, 'model, 'action, 'result) component_s_incr =
   (module Component_s_incr
-    with type Input.t = 'input
-     and type Model.t = 'model
-     and type Action.t = 'action
-     and type Result.t = 'result)
+     with type Input.t = 'input
+      and type Model.t = 'model
+      and type Action.t = 'action
+      and type Result.t = 'result)
 
 module type Mapn = sig
   type 'a t

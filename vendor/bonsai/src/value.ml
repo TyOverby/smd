@@ -75,7 +75,7 @@ and 'a t =
   }
 
 let rec sexp_of_t : type a. a t -> Sexp.t =
-  fun { value; _ } ->
+ fun { value; _ } ->
   match value with
   | Constant _ -> [%sexp "constant"]
   | Cutoff { t; equal = _ } -> [%sexp "cutoff", (t : t)]
@@ -101,7 +101,7 @@ let named n = { value = Named n; here = None }
 let cutoff ~equal t = { value = Cutoff { t; equal }; here = None }
 
 let rec eval : type a. Environment.t -> a t -> a Incr.t =
-  fun env { value; _ } ->
+ fun env { value; _ } ->
   match value with
   | Incr x -> x
   | Cutoff { t; equal } ->
@@ -111,11 +111,11 @@ let rec eval : type a. Environment.t -> a t -> a Incr.t =
   | Constant (x, _id) -> Incr.return x
   | Named name ->
     (match Environment.find env name with
-     | Some incremental -> incremental
-     | None ->
-       failwith
-         "A Value.t was used outside of the scope that it was declared in!  Make sure \
-          that you aren't storing any Value.t inside a ref!")
+    | Some incremental -> incremental
+    | None ->
+      failwith
+        "A Value.t was used outside of the scope that it was declared in!  Make sure \
+         that you aren't storing any Value.t inside a ref!")
   (* let%map collapsing *)
   | Map
       { f
@@ -215,7 +215,7 @@ let rec eval : type a. Environment.t -> a t -> a Incr.t =
       ~f:(fun t1 t2 t3 t4 -> f (t1, (t2, (t3, t4))))
   | Map { f; t = { value = Both (t1, { value = Both (t2, t3); _ }); _ } } ->
     Incr.map3 (eval env t1) (eval env t2) (eval env t3) ~f:(fun t1 t2 t3 ->
-      f (t1, (t2, t3)))
+        f (t1, (t2, t3)))
   | Map { f; t = { value = Both (t1, t2); _ } } ->
     Incr.map2 (eval env t1) (eval env t2) ~f:(fun t1 t2 -> f (t1, t2))
   (* Both collapsing *)
@@ -316,12 +316,12 @@ let rec eval : type a. Environment.t -> a t -> a Incr.t =
 let return a = { value = Constant (a, Constant_id.create ()); here = None }
 
 include Applicative.Make_using_map2 (struct
-    type nonrec 'a t = 'a t
+  type nonrec 'a t = 'a t
 
-    let return = return
-    let map2 = map2
-    let map = `Custom map
-  end)
+  let return = return
+  let map2 = map2
+  let map = `Custom map
+end)
 
 let both a b = { value = Both (a, b); here = None }
 let map3 t1 t2 t3 ~f = { value = Map3 { t1; t2; t3; f }; here = None }
@@ -348,11 +348,11 @@ let rec all = function
     map6 t1 t2 t3 t4 t5 t6 ~f:(fun a1 a2 a3 a4 a5 a6 -> [ a1; a2; a3; a4; a5; a6 ])
   | [ t1; t2; t3; t4; t5; t6; t7 ] ->
     map7 t1 t2 t3 t4 t5 t6 t7 ~f:(fun a1 a2 a3 a4 a5 a6 a7 ->
-      [ a1; a2; a3; a4; a5; a6; a7 ])
+        [ a1; a2; a3; a4; a5; a6; a7 ])
   | t1 :: t2 :: t3 :: t4 :: t5 :: t6 :: t7 :: rest ->
     let left =
       map7 t1 t2 t3 t4 t5 t6 t7 ~f:(fun a1 a2 a3 a4 a5 a6 a7 ->
-        [ a1; a2; a3; a4; a5; a6; a7 ])
+          [ a1; a2; a3; a4; a5; a6; a7 ])
     in
     let right = all rest in
     map2 left right ~f:(fun left right -> left @ right)

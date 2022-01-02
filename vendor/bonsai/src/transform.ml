@@ -7,7 +7,7 @@ module For_value = struct
   type 'from_parent user_mapper =
     { f :
         'a.
-          recurse:'from_parent mapper
+        recurse:'from_parent mapper
         -> var_from_parent:Type_equal.Id.Uid.t option
         -> parent_path:Node_path.t
         -> current_path:Node_path.t
@@ -17,15 +17,15 @@ module For_value = struct
     }
 
   let rec descend
-    : type a.
-      f:'from_parent user_mapper
-      -> var_from_parent:Type_equal.Id.Uid.t option
-      -> append_to:Node_path.t
-      -> 'from_parent
-      -> a Value.t
-      -> a Value.t
+      : type a.
+        f:'from_parent user_mapper
+        -> var_from_parent:Type_equal.Id.Uid.t option
+        -> append_to:Node_path.t
+        -> 'from_parent
+        -> a Value.t
+        -> a Value.t
     =
-    fun ~f ~var_from_parent ~append_to parent { value; here } ->
+   fun ~f ~var_from_parent ~append_to parent { value; here } ->
     let current_path = Node_path.descend append_to in
     let map n v =
       let append_to = Node_path.choice_point current_path n in
@@ -84,7 +84,7 @@ module For_value = struct
           }
     in
     { value; here }
-  ;;
+ ;;
 
   let map ~f ~var_from_parent ~parent_path ~append_to parent v =
     let current_path = Node_path.descend append_to in
@@ -103,7 +103,7 @@ module For_computation = struct
   type 'from_parent mapper =
     { f :
         'model 'action 'result.
-          'from_parent
+        'from_parent
         -> ('model, 'action, 'result) Computation.t
         -> ('model, 'action, 'result) Computation.t
     }
@@ -111,7 +111,7 @@ module For_computation = struct
   type 'from_parent user_mapper =
     { f :
         'model 'action 'result.
-          recurse:'from_parent mapper
+        recurse:'from_parent mapper
         -> var_from_parent:Type_equal.Id.Uid.t option
         -> parent_path:Node_path.t
         -> current_path:Node_path.t
@@ -121,15 +121,15 @@ module For_computation = struct
     }
 
   let rec descend
-    : type model action result.
-      f:'from_parent user_mapper
-      -> for_value:'a For_value.user_mapper
-      -> append_to:Node_path.t
-      -> 'from_parent
-      -> (model, action, result) Computation.t
-      -> (model, action, result) Computation.t
+      : type model action result.
+        f:'from_parent user_mapper
+        -> for_value:'a For_value.user_mapper
+        -> append_to:Node_path.t
+        -> 'from_parent
+        -> (model, action, result) Computation.t
+        -> (model, action, result) Computation.t
     =
-    fun ~f ~for_value ~append_to parent (computation : _ Computation.t) ->
+   fun ~f ~for_value ~append_to parent (computation : _ Computation.t) ->
     let current_path = Node_path.descend append_to in
     let map ?var_from_parent ?choice c =
       let append_to =
@@ -190,15 +190,15 @@ module For_computation = struct
         { match_ = map_value ~choice:1 match_
         ; arms =
             Map.map arms ~f:(fun c ->
-              incr index;
-              map_packed ~choice:!index c)
+                incr index;
+                map_packed ~choice:!index c)
         }
     | Lazy t -> Lazy (Lazy.map t ~f:map_packed)
     | Wrap t -> Wrap { t with inner = map t.inner }
     | With_model_resetter t -> With_model_resetter { t with t = map t.t }
     | Path -> computation
     | Lifecycle t -> Lifecycle (map_value t)
-  ;;
+ ;;
 end
 
 let map ~computation_mapper ~value_mapper ~init computation =
@@ -211,7 +211,7 @@ let map ~computation_mapper ~value_mapper ~init computation =
     ~recurse:
       { f =
           (fun parent c ->
-             descend ~f:computation_mapper ~for_value:value_mapper ~append_to parent c)
+            descend ~f:computation_mapper ~for_value:value_mapper ~append_to parent c)
       }
     init
     ~parent_path

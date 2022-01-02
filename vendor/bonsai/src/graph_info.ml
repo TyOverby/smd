@@ -39,8 +39,8 @@ module Node_info = struct
   ;;
 
   let of_computation
-        (type model action result)
-        (computation : (model, action, result) Computation.t)
+      (type model action result)
+      (computation : (model, action, result) Computation.t)
     =
     let here =
       match computation with
@@ -83,28 +83,28 @@ let empty =
 ;;
 
 let value_map
-      (type a)
-      ~(recurse : _ Transform.For_value.mapper)
-      ~var_from_parent
-      ~parent_path
-      ~current_path
-      state
-      ({ here; value } as wrapped_value : a Value.t)
+    (type a)
+    ~(recurse : _ Transform.For_value.mapper)
+    ~var_from_parent
+    ~parent_path
+    ~current_path
+    state
+    ({ here; value } as wrapped_value : a Value.t)
   =
   let environment, add_tree_relationship, add_dag_relationship = state in
   let node_info = Node_info.of_value wrapped_value in
   (match var_from_parent with
-   | Some var_from_parent ->
-     Hashtbl.add_exn environment ~key:var_from_parent ~data:current_path
-   | None -> ());
+  | Some var_from_parent ->
+    Hashtbl.add_exn environment ~key:var_from_parent ~data:current_path
+  | None -> ());
   add_tree_relationship ~from:current_path ~to_:parent_path ~from_info:node_info;
   add_dag_relationship ~from:current_path ~to_:parent_path;
   let value =
     match value with
     | Named id ->
       (match Hashtbl.find environment (Type_equal.Id.uid id) with
-       | Some named_id -> add_dag_relationship ~from:named_id ~to_:current_path
-       | None -> print_s [%message "BUG" [%here]]);
+      | Some named_id -> add_dag_relationship ~from:named_id ~to_:current_path
+      | None -> print_s [%message "BUG" [%here]]);
       value
     | v -> v
   in
@@ -112,29 +112,29 @@ let value_map
 ;;
 
 let computation_map
-      (type model action result)
-      ~(recurse : _ Transform.For_computation.mapper)
-      ~var_from_parent
-      ~parent_path
-      ~current_path
-      state
-      (computation : (model, action, result) Computation.t)
-  : (model, action, result) Computation.t
+    (type model action result)
+    ~(recurse : _ Transform.For_computation.mapper)
+    ~var_from_parent
+    ~parent_path
+    ~current_path
+    state
+    (computation : (model, action, result) Computation.t)
+    : (model, action, result) Computation.t
   =
   let environment, add_tree_relationship, add_dag_relationship = state in
   let node_info = Node_info.of_computation computation in
   add_tree_relationship ~from:current_path ~to_:parent_path ~from_info:node_info;
   add_dag_relationship ~from:current_path ~to_:parent_path;
   (match var_from_parent with
-   | Some var_from_parent ->
-     Hashtbl.add_exn environment ~key:var_from_parent ~data:current_path
-   | None -> ());
+  | Some var_from_parent ->
+    Hashtbl.add_exn environment ~key:var_from_parent ~data:current_path
+  | None -> ());
   match recurse.f state computation with
   | Fetch { id = v_id; _ } ->
     let uid = Type_equal.Id.uid v_id in
     (match Hashtbl.find environment uid with
-     | None -> ()
-     | Some named_id -> add_dag_relationship ~from:named_id ~to_:current_path);
+    | None -> ()
+    | Some named_id -> add_dag_relationship ~from:named_id ~to_:current_path);
     computation
   | c -> c
 ;;
@@ -149,10 +149,10 @@ let iter_graph_updates (t : (_, _, _) Computation.t) ~on_update =
   let add_tree_relationship ~from ~to_ ~from_info =
     let gm = !graph_info in
     graph_info
-    := { gm with
-         info = Map.add_exn gm.info ~key:from ~data:from_info
-       ; tree = Map.add_exn gm.tree ~key:from ~data:to_
-       };
+      := { gm with
+           info = Map.add_exn gm.info ~key:from ~data:from_info
+         ; tree = Map.add_exn gm.tree ~key:from ~data:to_
+         };
     on_update !graph_info
   in
   let environment = Type_equal.Id.Uid.Table.create () in

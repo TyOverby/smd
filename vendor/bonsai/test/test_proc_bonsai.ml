@@ -108,14 +108,14 @@ let%expect_test "on_display for updating a state" =
       | None ->
         return
         @@ let%map set_state = set_state
-        and input = input in
-        Some (set_state (Some input))
+           and input = input in
+           Some (set_state (Some input))
       | Some state ->
         return
         @@ let%map state = state
-        and set_state = set_state
-        and input = input in
-        if Int.equal state input then None else Some (set_state (Some input))
+           and set_state = set_state
+           and input = input in
+           if Int.equal state input then None else Some (set_state (Some input))
     in
     let%sub () = Bonsai.Edge.after_display' update in
     return (Value.both input state)
@@ -262,8 +262,8 @@ let%expect_test "wrap" =
       ~f:(fun model inject ->
         return
         @@ let%map model = model
-        and inject = inject in
-        Int.to_string model, inject)
+           and inject = inject in
+           Int.to_string model, inject)
   in
   let handle =
     Handle.create
@@ -475,9 +475,9 @@ let%expect_test "map > lazy" =
     in
     return
     @@ let%map label = label
-    and children = children
-    and depth = depth in
-    [%message label (depth : int) (children : Sexp.t Int.Map.t)]
+       and children = children
+       and depth = depth in
+       [%message label (depth : int) (children : Sexp.t Int.Map.t)]
   in
   let t_var = Bonsai.Var.create { M.label = "hi"; children = Int.Map.empty } in
   let t_value = Bonsai.Var.value t_var in
@@ -577,7 +577,7 @@ let%test_module "testing Bonsai internals" =
             let%sub v = Bonsai.state [%here] (module String) ~default_model:"hello" in
             return
             @@ let%map state, set_state = v in
-            { State_with_setter.state; set_state })
+               { State_with_setter.state; set_state })
       in
       let handle =
         Handle.create
@@ -706,7 +706,7 @@ let%expect_test "ignored result of assoc" =
 let%expect_test "on_display for updating a state (using on_change)" =
   let callback =
     Value.return (fun prev cur ->
-      Ui_effect.print_s [%message "change!" (prev : int option) (cur : int)])
+        Ui_effect.print_s [%message "change!" (prev : int option) (cur : int)])
   in
   let component input = Bonsai.Edge.on_change' [%here] (module Int) ~callback input in
   let var = Bonsai.Var.create 1 in
@@ -752,8 +752,8 @@ let%expect_test "actor" =
     in
     return
     @@ let%map effect = effect in
-    let%bind.Bonsai.Effect i = effect () in
-    print_int_effect i
+       let%bind.Bonsai.Effect i = effect () in
+       print_int_effect i
   in
   let handle =
     Handle.create
@@ -904,7 +904,7 @@ let%expect_test "Edge.poll in order" =
   [%expect {|
     ((pending (world hello)) (output ())) |}];
   Query_response_tracker.maybe_respond effect_tracker ~f:(fun s ->
-    Respond (String.uppercase s));
+      Respond (String.uppercase s));
   trigger_display ();
   [%expect {| ((pending ()) (output (WORLD))) |}]
 ;;
@@ -929,15 +929,15 @@ let%expect_test "Edge.poll out of order" =
   [%expect {|
     ((pending (world hello)) (output ())) |}];
   Query_response_tracker.maybe_respond effect_tracker ~f:(function
-    | "world" as s -> Respond (String.uppercase s)
-    | _ -> No_response_yet);
+      | "world" as s -> Respond (String.uppercase s)
+      | _ -> No_response_yet);
   trigger_display ();
   [%expect {|
     ((pending (hello))
      (output  (WORLD))) |}];
   Query_response_tracker.maybe_respond effect_tracker ~f:(function
-    | "hello" as s -> Respond (String.uppercase s)
-    | _ -> No_response_yet);
+      | "hello" as s -> Respond (String.uppercase s)
+      | _ -> No_response_yet);
   trigger_display ();
   [%expect {|
     ((pending ()) (output (WORLD))) |}]
@@ -1048,7 +1048,7 @@ let%expect_test "infinite chain!" =
   in
   let handle = Handle.create (Result_spec.string (module Unit)) computation in
   Expect_test_helpers_base.require_does_raise [%here] (fun () ->
-    Handle.recompute_view_until_stable handle);
+      Handle.recompute_view_until_stable handle);
   [%expect {| (Failure "view not stable after 100 recomputations") |}]
 ;;
 
@@ -1121,7 +1121,7 @@ let%expect_test "use resetter" =
   let id = Bonsai.Dynamic_scope.create ~name:"my-id" ~fallback:"no" () in
   let component =
     Bonsai.Dynamic_scope.set' id (Value.return "hello") ~f:(fun { revert } ->
-      revert (Bonsai.Dynamic_scope.lookup id))
+        revert (Bonsai.Dynamic_scope.lookup id))
   in
   let handle = Handle.create (Result_spec.string (module String)) component in
   Handle.show handle;
@@ -1136,7 +1136,7 @@ let%expect_test "nested resetter" =
       (Value.return "hello")
       ~inside:
         (Bonsai.Dynamic_scope.set' id (Value.return "world") ~f:(fun { revert } ->
-           revert (Bonsai.Dynamic_scope.lookup id)))
+             revert (Bonsai.Dynamic_scope.lookup id)))
   in
   let handle = Handle.create (Result_spec.string (module String)) component in
   Handle.show handle;
@@ -1148,14 +1148,14 @@ let%expect_test "resetter only impacts the id you target" =
   let id_b = Bonsai.Dynamic_scope.create ~name:"my-id" ~fallback:"no-b" () in
   let component =
     Bonsai.Dynamic_scope.set' id_a (Value.return "hello") ~f:(fun { revert } ->
-      Bonsai.Dynamic_scope.set
-        id_b
-        (Value.return "world")
-        ~inside:
-          (revert
-           @@ let%sub a = Bonsai.Dynamic_scope.lookup id_a in
-           let%sub b = Bonsai.Dynamic_scope.lookup id_b in
-           return (Value.map2 a b ~f:(fun a b -> a ^ " " ^ b))))
+        Bonsai.Dynamic_scope.set
+          id_b
+          (Value.return "world")
+          ~inside:
+            (revert
+            @@ let%sub a = Bonsai.Dynamic_scope.lookup id_a in
+               let%sub b = Bonsai.Dynamic_scope.lookup id_b in
+               return (Value.map2 a b ~f:(fun a b -> a ^ " " ^ b))))
   in
   let handle = Handle.create (Result_spec.string (module String)) component in
   Handle.show handle;
@@ -1201,7 +1201,7 @@ let%expect_test "derived value revert" =
   let a = Bonsai.Dynamic_scope.derived id ~get:M.a ~set:(Field.fset M.Fields.a) in
   let component =
     Bonsai.Dynamic_scope.set' a (Value.return "hello") ~f:(fun { revert } ->
-      revert (Bonsai.Dynamic_scope.lookup id))
+        revert (Bonsai.Dynamic_scope.lookup id))
   in
   let handle = Handle.create (Result_spec.sexp (module M)) component in
   Handle.show handle;
@@ -1223,7 +1223,7 @@ let%expect_test "derived value nested revert inner" =
       (Value.return "hello")
       ~inside:
         (Bonsai.Dynamic_scope.set' a (Value.return "world") ~f:(fun { revert } ->
-           revert (Bonsai.Dynamic_scope.lookup id)))
+             revert (Bonsai.Dynamic_scope.lookup id)))
   in
   let handle = Handle.create (Result_spec.sexp (module M)) component in
   Handle.show handle;
@@ -1242,10 +1242,10 @@ let%expect_test "derived value nested revert outer" =
   let b = Bonsai.Dynamic_scope.derived id ~get:M.b ~set:(Field.fset M.Fields.b) in
   let component =
     Bonsai.Dynamic_scope.set' a (Value.return "hello") ~f:(fun { revert } ->
-      Bonsai.Dynamic_scope.set
-        b
-        (Value.return 1000)
-        ~inside:(revert (Bonsai.Dynamic_scope.lookup id)))
+        Bonsai.Dynamic_scope.set
+          b
+          (Value.return 1000)
+          ~inside:(revert (Bonsai.Dynamic_scope.lookup id)))
   in
   let handle = Handle.create (Result_spec.sexp (module M)) component in
   Handle.show handle;
@@ -1354,7 +1354,7 @@ let%expect_test "state_machine_dynamic_model" =
       (module String)
       ~model:
         (`Computed
-           (Bonsai.Value.return (function
+          (Bonsai.Value.return (function
               | None -> "not set "
               | Some s -> sprintf "set %s" s)))
       ~apply_action:(fun ~inject:_ ~schedule_event:_ _model action -> action)
@@ -1381,14 +1381,14 @@ let%expect_test "portal" =
   let var = Bonsai.Var.create (Sexp.Atom "hello") in
   let component =
     Bonsai_extra.with_inject_fixed_point (fun inject ->
-      let%sub () =
-        Bonsai.Edge.on_change
-          [%here]
-          (module Sexp)
-          (Bonsai.Var.value var)
-          ~callback:inject
-      in
-      Bonsai.const ((), Ui_effect.print_s))
+        let%sub () =
+          Bonsai.Edge.on_change
+            [%here]
+            (module Sexp)
+            (Bonsai.Var.value var)
+            ~callback:inject
+        in
+        Bonsai.const ((), Ui_effect.print_s))
   in
   let handle = Handle.create (Result_spec.sexp (module Unit)) component in
   (* this is only necessary because I use on_change, which uses after-display.
@@ -1403,29 +1403,29 @@ let%expect_test "portal" =
 let%expect_test "portal 2" =
   let component =
     Bonsai_extra.with_inject_fixed_point (fun inject_fix ->
-      let%sub state1, inject1 =
-        Bonsai.state_machine1
-          [%here]
-          (module Int)
-          (module Int)
-          ~default_model:0
-          ~apply_action:(fun ~inject:_ ~schedule_event inject model action ->
-            schedule_event (inject (model + action));
-            action)
-          inject_fix
-      in
-      let%sub (), inject2 =
-        Bonsai.state_machine1
-          [%here]
-          (module Unit)
-          (module Int)
-          ~default_model:()
-          ~apply_action:(fun ~inject:_ ~schedule_event state1 _model action ->
-            schedule_event (Ui_effect.print_s [%message (state1 : int) (action : int)]);
-            ())
-          state1
-      in
-      return @@ Bonsai.Value.both inject1 inject2)
+        let%sub state1, inject1 =
+          Bonsai.state_machine1
+            [%here]
+            (module Int)
+            (module Int)
+            ~default_model:0
+            ~apply_action:(fun ~inject:_ ~schedule_event inject model action ->
+              schedule_event (inject (model + action));
+              action)
+            inject_fix
+        in
+        let%sub (), inject2 =
+          Bonsai.state_machine1
+            [%here]
+            (module Unit)
+            (module Int)
+            ~default_model:()
+            ~apply_action:(fun ~inject:_ ~schedule_event state1 _model action ->
+              schedule_event (Ui_effect.print_s [%message (state1 : int) (action : int)]);
+              ())
+            state1
+        in
+        return @@ Bonsai.Value.both inject1 inject2)
   in
   let handle =
     Handle.create
@@ -1456,11 +1456,11 @@ let%expect_test "pipe" =
     let%sub push_and_pop = Bonsai_extra.pipe [%here] (module String) in
     return
     @@ let%map push, pop = push_and_pop in
-    let pop s =
-      let%bind.Bonsai.Effect a = pop in
-      Ui_effect.print_s [%sexp "pop", (s : string), (a : string)]
-    in
-    push, pop
+       let pop s =
+         let%bind.Bonsai.Effect a = pop in
+         Ui_effect.print_s [%sexp "pop", (s : string), (a : string)]
+       in
+       push, pop
   in
   let handle =
     Handle.create
@@ -1510,8 +1510,8 @@ let%expect_test "multi-thunk" =
   let module Id = Core.Unique_id.Int () in
   let id =
     Bonsai_extra.thunk (fun () ->
-      print_endline "pulling id!";
-      Id.create ())
+        print_endline "pulling id!";
+        Id.create ())
   in
   let component =
     let%map.Computation a = id
@@ -1566,8 +1566,8 @@ let%expect_test "thunk-storage" =
   let var = Bonsai.Var.create true in
   let id =
     Bonsai_extra.thunk (fun () ->
-      print_endline "pulling id!";
-      Id.create ())
+        print_endline "pulling id!";
+        Id.create ())
   in
   let component =
     if%sub Bonsai.Var.value var
@@ -1595,14 +1595,14 @@ module _ = struct
     let interactive = Bonsai.Var.create interactive in
     let store_set =
       (fun value ->
-         printf "store set to \"%s\"" value;
-         Bonsai.Var.set store value)
+        printf "store set to \"%s\"" value;
+        Bonsai.Var.set store value)
       |> Ui_effect.of_sync_fun
     in
     let interactive_set =
       (fun value ->
-         printf "interactive set to \"%s\"" value;
-         Bonsai.Var.set interactive value)
+        printf "interactive set to \"%s\"" value;
+        Bonsai.Var.set interactive value)
       |> Ui_effect.of_sync_fun
     in
     let component =

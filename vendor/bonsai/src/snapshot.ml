@@ -18,7 +18,7 @@ module Apply_action = struct
     | Non_incremental i -> Incr.return i
     | Impossible witness ->
       Incr.return (fun ~schedule_event:_ _model action ->
-        Nothing.unreachable_code (witness action))
+          Nothing.unreachable_code (witness action))
   ;;
 
   let rec map t ~f =
@@ -43,8 +43,8 @@ module Apply_action = struct
     | Impossible a, Impossible b ->
       Impossible
         (function
-          | First x -> a x
-          | Second y -> b y)
+        | First x -> a x
+        | Second y -> b y)
     | Impossible a, Non_incremental b ->
       let a ~schedule_event:_ _model action = Nothing.unreachable_code (a action) in
       Non_incremental (join a b)
@@ -76,10 +76,10 @@ let annotate ~name ~color t =
 
 let create ~apply_action ~lifecycle ~result =
   (match apply_action with
-   | Apply_action.Incremental apply_action ->
-     annotate ~name:"apply_action" ~color:"cornsilk" apply_action
-   | Non_incremental _ -> ()
-   | Impossible _ -> ());
+  | Apply_action.Incremental apply_action ->
+    annotate ~name:"apply_action" ~color:"cornsilk" apply_action
+  | Non_incremental _ -> ()
+  | Impossible _ -> ());
   Option.iter lifecycle ~f:(annotate ~name:"lifecycle" ~color:"lightsalmon");
   annotate ~name:"result" ~color:"lightcoral" result;
   Fields.create ~apply_action ~lifecycle ~result

@@ -1,7 +1,6 @@
 open! Core
 open! Import
 
-
 (** Both [For_value.map] and [For_computation.map] involve interacting
     universally quantified functions. Since OCaml does not support first-class
     universally quantified functions, so we have to wrap the function in
@@ -36,7 +35,7 @@ module For_value : sig
   type 'from_parent user_mapper =
     { f :
         'a.
-          recurse:'from_parent mapper
+        recurse:'from_parent mapper
         -> var_from_parent:Type_equal.Id.Uid.t option
         -> parent_path:Node_path.t
         -> current_path:Node_path.t
@@ -50,7 +49,7 @@ module For_computation : sig
   type 'from_parent mapper =
     { f :
         'model 'action 'result.
-          'from_parent
+        'from_parent
         -> ('model, 'action, 'result) Computation.t
         -> ('model, 'action, 'result) Computation.t
     }
@@ -58,7 +57,7 @@ module For_computation : sig
   type 'from_parent user_mapper =
     { f :
         'model 'action 'result.
-          recurse:'from_parent mapper
+        recurse:'from_parent mapper
         -> var_from_parent:Type_equal.Id.Uid.t option
         -> parent_path:Node_path.t
         -> current_path:Node_path.t

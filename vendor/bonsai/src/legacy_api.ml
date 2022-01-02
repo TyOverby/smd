@@ -51,7 +51,7 @@ module Map = struct
     let open Proc.Let_syntax in
     let%pattern_bind input, extra = input in
     Proc.assoc comparator input ~f:(fun key data ->
-      f (Tuple3.create <$> key <*> data <*> extra))
+        f (Tuple3.create <$> key <*> data <*> extra))
   ;;
 end
 
@@ -119,11 +119,11 @@ module With_incr = struct
   let of_incr i _ = Proc.read (Proc.Private.conceal_value (Value.of_incr i))
 
   let of_module
-        (type i m a r)
-        (component : (i, m, a, r) component_s_incr)
-        ~default_model
-        input
-    : r Proc.Computation.t
+      (type i m a r)
+      (component : (i, m, a, r) component_s_incr)
+      ~default_model
+      input
+      : r Proc.Computation.t
     =
     let input = Proc.Private.reveal_value input in
     let (module M) = component in
@@ -174,9 +174,9 @@ module With_incr = struct
 
   let value_cutoff ~cutoff =
     map input ~f:(fun input ->
-      let input = Incr.map input ~f:Fn.id in
-      Incr.set_cutoff input cutoff;
-      input)
+        let input = Incr.map input ~f:Fn.id in
+        Incr.set_cutoff input cutoff;
+        input)
   ;;
 end
 

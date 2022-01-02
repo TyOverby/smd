@@ -8,15 +8,30 @@ type attr = string * string list * (string * string) list
 (** Target of a link: url and title. *)
 type target = string * string
 
-type list_number_style = DefaultStyle | Example | Decimal | LowerRoman | UpperRoman | LowerAlpha | UpperAlpha
+type list_number_style =
+  | DefaultStyle
+  | Example
+  | Decimal
+  | LowerRoman
+  | UpperRoman
+  | LowerAlpha
+  | UpperAlpha
 
-type list_number_delim = DefaultDelim | Period | OneParen | TwoParensPeriod
+type list_number_delim =
+  | DefaultDelim
+  | Period
+  | OneParen
+  | TwoParensPeriod
 
 type list_attributes = int * list_number_style * list_number_delim
 
-type math_type = DisplayMath | InlineMath
+type math_type =
+  | DisplayMath
+  | InlineMath
 
-type quote_type = DoubleQuote | SingleQuote
+type quote_type =
+  | DoubleQuote
+  | SingleQuote
 
 (** Format for raw blocks. *)
 type format = string
@@ -47,7 +62,11 @@ and block =
   | UnhandledBlock of Yojson.Basic.t
 
 (** JSON representation of a pandoc file. *)
-type t = { api_version : int list; meta : Yojson.Basic.t; blocks : block list }
+type t =
+  { api_version : int list
+  ; meta : Yojson.Basic.t
+  ; blocks : block list
+  }
 
 (** {2 Reading and writing} *)
 
@@ -79,7 +98,11 @@ val meta_string : t -> string -> string
 (** General mapping function which maps a function on blocks and a function on
     inlines. If the functions return [None] the mapping is further recursed
     into. *)
-val map : ?block:(block -> block list option) -> ?inline:(inline -> inline list option) -> t -> t
+val map
+  :  ?block:(block -> block list option)
+  -> ?inline:(inline -> inline list option)
+  -> t
+  -> t
 
 (** Map a function to every list of inlines. *)
 val map_inlines : (inline list -> inline list) -> t -> t

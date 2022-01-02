@@ -207,24 +207,24 @@ let concat_map ~inline ~block t =
   let rec visit_block (b : Block.t) : Block.t list =
     block
       (match b with
-       | BulletList blocks ->
-         Block.BulletList (blocks |> List.map ~f:(List.concat_map ~f:visit_block))
-       | Header (a, b, inlines) -> Header (a, b, List.concat_map inlines ~f:visit_inline)
-       | OrderedList (a, blocks) ->
-         OrderedList (a, blocks |> List.map ~f:(List.concat_map ~f:visit_block))
-       | Para inlines -> Para (List.concat_map inlines ~f:visit_inline)
-       | Plain inlines -> Plain (List.concat_map inlines ~f:visit_inline)
-       | Div (a, blocks) -> Div (a, List.concat_map blocks ~f:visit_block)
-       | (CodeBlock _ | RawBlock _ | UnhandledBlock _) as other -> other)
+      | BulletList blocks ->
+        Block.BulletList (blocks |> List.map ~f:(List.concat_map ~f:visit_block))
+      | Header (a, b, inlines) -> Header (a, b, List.concat_map inlines ~f:visit_inline)
+      | OrderedList (a, blocks) ->
+        OrderedList (a, blocks |> List.map ~f:(List.concat_map ~f:visit_block))
+      | Para inlines -> Para (List.concat_map inlines ~f:visit_inline)
+      | Plain inlines -> Plain (List.concat_map inlines ~f:visit_inline)
+      | Div (a, blocks) -> Div (a, List.concat_map blocks ~f:visit_block)
+      | (CodeBlock _ | RawBlock _ | UnhandledBlock _) as other -> other)
   and visit_inline (i : Inline.t) : Inline.t list =
     inline
       (match i with
-       | Emph inlines -> Inline.Emph (List.concat_map inlines ~f:visit_inline)
-       | Image (a, inlines, c) -> Image (a, List.concat_map inlines ~f:visit_inline, c)
-       | Link (a, inlines, c) -> Link (a, List.concat_map inlines ~f:visit_inline, c)
-       | Quoted (a, inlines) -> Quoted (a, List.concat_map inlines ~f:visit_inline)
-       | SmallCaps inlines -> SmallCaps (List.concat_map inlines ~f:visit_inline)
-       | (Code _ | RawInline _ | Space | Str _ | UnhandledInline _) as other -> other)
+      | Emph inlines -> Inline.Emph (List.concat_map inlines ~f:visit_inline)
+      | Image (a, inlines, c) -> Image (a, List.concat_map inlines ~f:visit_inline, c)
+      | Link (a, inlines, c) -> Link (a, List.concat_map inlines ~f:visit_inline, c)
+      | Quoted (a, inlines) -> Quoted (a, List.concat_map inlines ~f:visit_inline)
+      | SmallCaps inlines -> SmallCaps (List.concat_map inlines ~f:visit_inline)
+      | (Code _ | RawInline _ | Space | Str _ | UnhandledInline _) as other -> other)
   in
   let blocks = List.concat_map t.blocks ~f:visit_block in
   { t with blocks }
@@ -313,16 +313,16 @@ module List_item = struct
     then Empty
     else
       with_return (fun { return } ->
-        iter
-          { api_version = []; meta = `Null; blocks }
-          ~block:(function
-            | BulletList _ -> return (No_inline_strings blocks)
-            | _ -> ())
-          ~inline:(function
-            | Str s when String.equal s unchecked_str -> return (Unchecked blocks)
-            | Str s when String.equal s checked_str -> return (Checked blocks)
-            | _ -> return (Normal blocks));
-        No_inline_strings blocks)
+          iter
+            { api_version = []; meta = `Null; blocks }
+            ~block:(function
+              | BulletList _ -> return (No_inline_strings blocks)
+              | _ -> ())
+            ~inline:(function
+              | Str s when String.equal s unchecked_str -> return (Unchecked blocks)
+              | Str s when String.equal s checked_str -> return (Checked blocks)
+              | _ -> return (Normal blocks));
+          No_inline_strings blocks)
   ;;
 
   let of_blocks (blocks : Block.t list) =
@@ -338,11 +338,11 @@ module List_item = struct
       :: _ -> No_inline_strings blocks
     | (Para spans | Plain spans) :: rest ->
       (match spans, rest with
-       | [], [] -> Empty
-       | [], rest -> No_inline_strings rest
-       | Str s :: _, _ when String.equal s unchecked_str -> Unchecked blocks
-       | Str s :: _, _ when String.equal s checked_str -> Checked blocks
-       | _ -> Normal blocks)
+      | [], [] -> Empty
+      | [], rest -> No_inline_strings rest
+      | Str s :: _, _ when String.equal s unchecked_str -> Unchecked blocks
+      | Str s :: _, _ when String.equal s checked_str -> Checked blocks
+      | _ -> Normal blocks)
   ;;
 
   let empty_to_checked () = Checked [ Block.Plain [ Str checked_str; Space ] ]
@@ -351,14 +351,14 @@ module List_item = struct
   let normal_to_checked_or_unchecked checked_or_unchecked ~f blocks =
     blocks
     |> with_blocks ~f:(fun t ->
-      folding_concat_map
-        t
-        ~init:true
-        ~block:(fun acc b -> acc, [ b ])
-        ~inline:(fun acc i ->
-          match acc with
-          | true -> false, [ Str checked_or_unchecked; Space; i ]
-          | false -> false, [ i ]))
+           folding_concat_map
+             t
+             ~init:true
+             ~block:(fun acc b -> acc, [ b ])
+             ~inline:(fun acc i ->
+               match acc with
+               | true -> false, [ Str checked_or_unchecked; Space; i ]
+               | false -> false, [ i ]))
     |> f
   ;;
 
@@ -385,14 +385,14 @@ module List_item = struct
   let checked_or_unchecked_to_checked_or_unchecked checked_or_unchecked ~f blocks =
     blocks
     |> with_blocks ~f:(fun t ->
-      folding_concat_map
-        t
-        ~init:true
-        ~block:(fun acc b -> acc, [ b ])
-        ~inline:(fun acc i ->
-          match acc with
-          | true -> false, [ Str checked_or_unchecked ]
-          | false -> false, [ i ]))
+           folding_concat_map
+             t
+             ~init:true
+             ~block:(fun acc b -> acc, [ b ])
+             ~inline:(fun acc i ->
+               match acc with
+               | true -> false, [ Str checked_or_unchecked ]
+               | false -> false, [ i ]))
     |> f
   ;;
 
@@ -411,20 +411,20 @@ module List_item = struct
     | other ->
       let blocks =
         with_blocks other ~f:(fun t ->
-          folding_concat_map
-            t
-            ~init:true
-            ~block:(fun acc b -> acc, [ b ])
-            ~inline:(fun acc i ->
-              match acc with
-              | true -> false, []
-              | false -> false, [ i ]))
+            folding_concat_map
+              t
+              ~init:true
+              ~block:(fun acc b -> acc, [ b ])
+              ~inline:(fun acc i ->
+                match acc with
+                | true -> false, []
+                | false -> false, [ i ]))
       in
       (match blocks with
-       | (Plain [] | Para []) :: rest -> rest
-       | (Plain [ Space ] | Para [ Space ]) :: rest -> rest
-       | (Plain (Space :: more) | Para (Space :: more)) :: rest -> Plain more :: rest
-       | other -> other)
+      | (Plain [] | Para []) :: rest -> rest
+      | (Plain [ Space ] | Para [ Space ]) :: rest -> rest
+      | (Plain (Space :: more) | Para (Space :: more)) :: rest -> Plain more :: rest
+      | other -> other)
       |> Normal
   ;;
 

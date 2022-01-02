@@ -1,16 +1,44 @@
 (library
-  (name common)
-  (modules common)
-  (libraries notty notty.unix))
+ (name common)
+ (modules common)
+ (libraries notty notty.unix))
 
 (executables
-  (names testpatterns colors almondbread crops cursor cuts emoji inline keys
-         letters mouse thisbig runes sierpinski rain 
-         regions)
-  (modules testpatterns colors almondbread crops cursor cuts emoji inline keys
-           letters mouse thisbig runes sierpinski rain 
-           regions)
-  (libraries common))
+ (names
+  testpatterns
+  colors
+  almondbread
+  crops
+  cursor
+  cuts
+  emoji
+  inline
+  keys
+  letters
+  mouse
+  thisbig
+  runes
+  sierpinski
+  rain
+  regions)
+ (modules
+  testpatterns
+  colors
+  almondbread
+  crops
+  cursor
+  cuts
+  emoji
+  inline
+  keys
+  letters
+  mouse
+  thisbig
+  runes
+  sierpinski
+  rain
+  regions)
+ (libraries common))
 
 ; (alias
 ;   (name ex)

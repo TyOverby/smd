@@ -3,11 +3,11 @@ open! Import
 module Var = Var
 
 let sub
-      (type via)
-      ?here
-      (Computation.T { t = from; action = from_action; model = from_model } :
-         via Computation.packed)
-      ~f
+    (type via)
+    ?here
+    (Computation.T { t = from; action = from_action; model = from_model } :
+      via Computation.packed)
+    ~f
   =
   let via : via Type_equal.Id.t =
     Type_equal.Id.create ~name:(Source_code_position.to_string [%here]) [%sexp_of: opaque]
@@ -110,10 +110,10 @@ let with_model_resetter (Computation.T { t; model; action }) =
 ;;
 
 let assoc
-      (type k v cmp)
-      (comparator : (k, cmp) comparator)
-      (map : (k, v, cmp) Map.t Value.t)
-      ~f
+    (type k v cmp)
+    (comparator : (k, cmp) comparator)
+    (map : (k, v, cmp) Map.t Value.t)
+    ~f
   =
   let module C = (val comparator) in
   let key_id : k Type_equal.Id.t = Type_equal.Id.create ~name:"key id" C.sexp_of_t in
@@ -169,13 +169,13 @@ let enum (type k) (module E : Enum with type t = k) ~match_ ~with_ =
 ;;
 
 let state_machine1
-      (type m a)
-      here
-      (module M : Model with type t = m)
-      (module A : Action with type t = a)
-      ~default_model
-      ~apply_action
-      input
+    (type m a)
+    here
+    (module M : Model with type t = m)
+    (module A : Action with type t = a)
+    ~default_model
+    ~apply_action
+    input
   =
   let compute ~inject _input model = model, inject in
   let name = Source_code_position.to_string here in
@@ -200,48 +200,48 @@ let state_machine0 here model action ~default_model ~apply_action =
 ;;
 
 let actor1
-  : type input model action return.
-    Source_code_position.t
-    -> (module Model with type t = model)
-    -> (module Action with type t = action)
-    -> default_model:model
-    -> recv:
-         (schedule_event:(unit Ui_effect.t -> unit)
-          -> input
-          -> model
-          -> action
-          -> model * return)
-    -> input Value.t
-    -> (model * (action -> return Effect.t)) Computation.packed
+    : type input model action return.
+      Source_code_position.t
+      -> (module Model with type t = model)
+      -> (module Action with type t = action)
+      -> default_model:model
+      -> recv:
+           (schedule_event:(unit Ui_effect.t -> unit)
+            -> input
+            -> model
+            -> action
+            -> model * return)
+      -> input Value.t
+      -> (model * (action -> return Effect.t)) Computation.packed
   =
-  fun here
-    (module M : Model with type t = model)
-    (module A : Action with type t = action)
-    ~default_model
-    ~recv
-    input ->
-    let module Action_with_callback = struct
-      type t = (action, return) Effect.Private.Callback.t
+ fun here
+     (module M : Model with type t = model)
+     (module A : Action with type t = action)
+     ~default_model
+     ~recv
+     input ->
+  let module Action_with_callback = struct
+    type t = (action, return) Effect.Private.Callback.t
 
-      let sexp_of_t cb = A.sexp_of_t (Effect.Private.Callback.request cb)
-    end
-    in
-    let%sub model_and_inject =
-      state_machine1
-        here
-        (module M)
-        (module Action_with_callback)
-        ~default_model
-        ~apply_action:(fun ~inject:_ ~schedule_event input model callback ->
-          let action = Effect.Private.Callback.request callback in
-          let new_model, response = recv ~schedule_event input model action in
-          schedule_event (Effect.Private.Callback.respond_to callback response);
-          new_model)
-        input
-    in
-    let%arr model, inject = model_and_inject in
-    let inject action = Effect.Private.make ~request:action ~evaluator:inject in
-    model, inject
+    let sexp_of_t cb = A.sexp_of_t (Effect.Private.Callback.request cb)
+  end
+  in
+  let%sub model_and_inject =
+    state_machine1
+      here
+      (module M)
+      (module Action_with_callback)
+      ~default_model
+      ~apply_action:(fun ~inject:_ ~schedule_event input model callback ->
+        let action = Effect.Private.Callback.request callback in
+        let new_model, response = recv ~schedule_event input model action in
+        schedule_event (Effect.Private.Callback.respond_to callback response);
+        new_model)
+      input
+  in
+  let%arr model, inject = model_and_inject in
+  let inject action = Effect.Private.make ~request:action ~evaluator:inject in
+  model, inject
 ;;
 
 let actor0 here model action ~default_model ~recv =
@@ -396,14 +396,14 @@ module Edge = struct
     end
 
     let poll_effect_on_change_implementation
-          (type i r)
-          here
-          (module Input : Model with type t = i)
-          (module Result : Model with type t = r)
-          ~initial
-          ~wrap_result
-          ~effect
-          input
+        (type i r)
+        here
+        (module Input : Model with type t = i)
+        (module Result : Model with type t = r)
+        ~initial
+        ~wrap_result
+        ~effect
+        input
       =
       let%sub _, next_seqnum =
         actor0
@@ -432,9 +432,9 @@ module Edge = struct
           (module Action)
           ~apply_action:
             (fun ~inject:_ ~schedule_event:_ model (Action.Set (seqnum, res)) ->
-               if seqnum < model.State.last_seqnum
-               then model
-               else { State.last_seqnum = seqnum; last_result = res })
+            if seqnum < model.State.last_seqnum
+            then model
+            else { State.last_seqnum = seqnum; last_result = res })
           ~default_model:{ State.last_seqnum = -1; last_result = initial }
       in
       let callback =
@@ -452,43 +452,43 @@ module Edge = struct
     ;;
 
     let effect_on_change
-      : type a o r.
-        Source_code_position.t
-        -> (module Model with type t = a)
-        -> (module Model with type t = o)
-        -> (o, r) Starting.t
-        -> a Value.t
-        -> effect:(a -> o Effect.t) Value.t
-        -> r Computation.packed
+        : type a o r.
+          Source_code_position.t
+          -> (module Model with type t = a)
+          -> (module Model with type t = o)
+          -> (o, r) Starting.t
+          -> a Value.t
+          -> effect:(a -> o Effect.t) Value.t
+          -> r Computation.packed
       =
-      fun here
-        (module Input : Model with type t = a)
-        (module Result : Model with type t = o)
-        (kind : (o, r) Starting.t)
-        input
-        ~effect ->
-        match kind with
-        | Starting.Empty ->
-          poll_effect_on_change_implementation
-            here
-            (module Input)
-            (module struct
-              type t = Result.t option [@@deriving sexp, equal]
-            end)
-            ~effect
-            ~initial:None
-            ~wrap_result:Option.some
-            input
-        | Starting.Initial initial ->
-          poll_effect_on_change_implementation
-            here
-            (module Input)
-            (module Result)
-            ~effect
-            ~initial
-            ~wrap_result:Fn.id
-            input
-    ;;
+     fun here
+         (module Input : Model with type t = a)
+         (module Result : Model with type t = o)
+         (kind : (o, r) Starting.t)
+         input
+         ~effect ->
+      match kind with
+      | Starting.Empty ->
+        poll_effect_on_change_implementation
+          here
+          (module Input)
+          (module struct
+            type t = Result.t option [@@deriving sexp, equal]
+          end)
+          ~effect
+          ~initial:None
+          ~wrap_result:Option.some
+          input
+      | Starting.Initial initial ->
+        poll_effect_on_change_implementation
+          here
+          (module Input)
+          (module Result)
+          ~effect
+          ~initial
+          ~wrap_result:Fn.id
+          input
+   ;;
   end
 end
 
@@ -547,24 +547,24 @@ module Dynamic_scope = struct
   ;;
 
   let rec fetch : type a b. a t -> default:b -> for_some:(a -> b) -> b Computation.packed =
-    fun t ~default ~for_some ->
-      match t with
-      | Independent { id; _ } ->
-        Computation.T
-          { t = Computation.Fetch { id; default; for_some }
-          ; action = Meta.Action.nothing
-          ; model = Meta.Model.unit
-          }
-      | Derived { base; get; set = _; sexp_of = _ } ->
-        fetch base ~default ~for_some:(fun x -> for_some (get x))
-  ;;
+   fun t ~default ~for_some ->
+    match t with
+    | Independent { id; _ } ->
+      Computation.T
+        { t = Computation.Fetch { id; default; for_some }
+        ; action = Meta.Action.nothing
+        ; model = Meta.Model.unit
+        }
+    | Derived { base; get; set = _; sexp_of = _ } ->
+      fetch base ~default ~for_some:(fun x -> for_some (get x))
+ ;;
 
   let lookup (type a) (var : a t) = fetch var ~default:(fallback var) ~for_some:Fn.id
 
   let rec store
-    : type a. a t -> a Value.t -> 'r Computation.packed -> 'r Computation.packed
+      : type a. a t -> a Value.t -> 'r Computation.packed -> 'r Computation.packed
     =
-    fun var value c ->
+   fun var value c ->
     match var with
     | Independent { id; _ } ->
       let (Computation.T { t; action; model }) = c in
@@ -577,7 +577,7 @@ module Dynamic_scope = struct
         set current value
       in
       store base new_ c
-  ;;
+ ;;
 
   type revert = { revert : 'a. 'a Computation.packed -> 'a Computation.packed }
 
@@ -595,8 +595,8 @@ end
 module Clock = struct
   let approx_now ~tick_every =
     Incr.with_clock (fun clock ->
-      let%map.Ui_incr () = Ui_incr.Clock.at_intervals clock tick_every in
-      Ui_incr.Clock.now clock)
+        let%map.Ui_incr () = Ui_incr.Clock.at_intervals clock tick_every in
+        Ui_incr.Clock.now clock)
   ;;
 
   let now = Incr.with_clock Ui_incr.Clock.watch_now
@@ -610,7 +610,7 @@ module Clock = struct
 
   let at time =
     Incr.compute_with_clock time ~f:(fun clock ->
-      Ui_incr.bind ~f:(Ui_incr.Clock.at clock))
+        Ui_incr.bind ~f:(Ui_incr.Clock.at clock))
   ;;
 
   module Time_ns_model = struct
@@ -621,20 +621,20 @@ module Clock = struct
 
   let get_current_time =
     Incr.with_clock (fun clock ->
-      Ui_incr.return (Effect.of_sync_fun (fun () -> Ui_incr.Clock.now clock) ()))
+        Ui_incr.return (Effect.of_sync_fun (fun () -> Ui_incr.Clock.now clock) ()))
   ;;
 
   let every here span callback =
     let%sub input =
       Incr.with_clock (fun clock ->
-        (* Even though this node has type unit (which should aggresively get cut
+          (* Even though this node has type unit (which should aggresively get cut
            off), the documentation for [at_intervals] mentions that the node has
            its cutoff manually overridden to never cut-off. *)
-        let%map.Ui_incr () = Ui_incr.Clock.at_intervals clock span in
-        (* The value of this node is the current time, which isn't actually used,
+          let%map.Ui_incr () = Ui_incr.Clock.at_intervals clock span in
+          (* The value of this node is the current time, which isn't actually used,
            but it's a nice monotonically increasing value, so we don't need to
            worry about cutoff issues. *)
-        Ui_incr.Clock.now clock)
+          Ui_incr.Clock.now clock)
     in
     let callback =
       let%map callback = callback in
@@ -649,26 +649,26 @@ module Computation = struct
   type 'a t = 'a Computation.packed
 
   include Applicative.Make_using_map2 (struct
-      type nonrec 'a t = 'a t
+    type nonrec 'a t = 'a t
 
-      let return = const
+    let return = const
 
-      let map2 a b ~f =
-        let%sub a = a in
-        let%sub b = b in
-        let%arr a = a
-        and b = b in
-        f a b
-      ;;
+    let map2 a b ~f =
+      let%sub a = a in
+      let%sub b = b in
+      let%arr a = a
+      and b = b in
+      f a b
+    ;;
 
-      let map a ~f =
-        let%sub a = a in
-        let%arr a = a in
-        f a
-      ;;
+    let map a ~f =
+      let%sub a = a in
+      let%arr a = a in
+      f a
+    ;;
 
-      let map = `Custom map
-    end)
+    let map = `Custom map
+  end)
 
   module Mapn = struct
     let map2 = map2
@@ -733,11 +733,11 @@ module Computation = struct
       map6 t1 t2 t3 t4 t5 t6 ~f:(fun a1 a2 a3 a4 a5 a6 -> [ a1; a2; a3; a4; a5; a6 ])
     | [ t1; t2; t3; t4; t5; t6; t7 ] ->
       map7 t1 t2 t3 t4 t5 t6 t7 ~f:(fun a1 a2 a3 a4 a5 a6 a7 ->
-        [ a1; a2; a3; a4; a5; a6; a7 ])
+          [ a1; a2; a3; a4; a5; a6; a7 ])
     | t1 :: t2 :: t3 :: t4 :: t5 :: t6 :: t7 :: rest ->
       let left =
         map7 t1 t2 t3 t4 t5 t6 t7 ~f:(fun a1 a2 a3 a4 a5 a6 a7 ->
-          [ a1; a2; a3; a4; a5; a6; a7 ])
+            [ a1; a2; a3; a4; a5; a6; a7 ])
       in
       let right = all rest in
       map2 left right ~f:(fun left right -> left @ right)
@@ -745,9 +745,9 @@ module Computation = struct
 
   let reduce_balanced xs ~f =
     List.reduce_balanced xs ~f:(fun a b ->
-      let%sub a = a in
-      let%sub b = b in
-      f a b)
+        let%sub a = a in
+        let%sub b = b in
+        f a b)
   ;;
 
   let all_unit xs = all xs |> map ~f:(fun (_ : unit list) -> ())

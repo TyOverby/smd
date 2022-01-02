@@ -70,10 +70,10 @@ module Handle = struct
     (unit, 'result * string * ('incoming -> unit Effect.t)) Driver.t
 
   let create
-        (type result incoming)
-        (result_spec : (result, incoming) Result_spec.t)
-        ?(clock = Incr.Clock.create ~start:Time_ns.epoch ())
-        computation
+      (type result incoming)
+      (result_spec : (result, incoming) Result_spec.t)
+      ?(clock = Incr.Clock.create ~start:Time_ns.epoch ())
+      computation
     =
     let (module R) = result_spec in
     let component (_ : unit Value.t) =
@@ -128,11 +128,11 @@ module Handle = struct
 
   let recompute_view_until_stable ?(max_computes = 100) handle =
     with_return (fun { return } ->
-      for _ = 1 to max_computes do
-        recompute_view handle;
-        if not (Driver.has_after_display_events handle) then return ()
-      done;
-      failwithf "view not stable after %d recomputations" max_computes ())
+        for _ = 1 to max_computes do
+          recompute_view handle;
+          if not (Driver.has_after_display_events handle) then return ()
+        done;
+        failwithf "view not stable after %d recomputations" max_computes ())
   ;;
 
   let generic_show handle ~before ~f =

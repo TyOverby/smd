@@ -32,8 +32,8 @@ module Model = struct
   let sexp_of_t (T { model; info = { sexp_of; _ }; _ }) = sexp_of model
 
   let equal
-        (T { model = m1; info = { type_id = t1; equal; _ }; _ })
-        (T { model = m2; info = { type_id = t2; _ }; _ })
+      (T { model = m1; info = { type_id = t1; equal; _ }; _ })
+      (T { model = m2; info = { type_id = t2; _ }; _ })
     =
     match Type_equal.Id.same_witness t1 t2 with
     | Some T -> equal m1 m2
@@ -59,10 +59,10 @@ module Multi_model = struct
   ;;
 
   let t_of_sexp
-        (type k cmp)
-        ((module K) : (k, cmp) comparator)
-        (default_models : Model.t Map.M(K).t)
-        sexp
+      (type k cmp)
+      ((module K) : (k, cmp) comparator)
+      (default_models : Model.t Map.M(K).t)
+      sexp
     =
     let k_to_sexp_map = [%of_sexp: Sexp.t Map.M(K).t] sexp in
     Map.merge k_to_sexp_map default_models ~f:(fun ~key:_ -> function
@@ -83,6 +83,6 @@ module Multi_model = struct
      ; sexp_of
      ; of_sexp
      }
-     : (k, cmp) t Meta.Model.t)
+      : (k, cmp) t Meta.Model.t)
   ;;
 end

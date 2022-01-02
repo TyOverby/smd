@@ -5,8 +5,12 @@ open Notty
 open Common
 
 let () =
-  Notty_unix.output_image_size @@ fun (w, h) ->
-    Images.outline
-      I.(hsnap (w - 2) @@
-          vsnap (h - 3) @@ (* +1 for the prompt *)
-            Images.sierp 5)
+  Notty_unix.output_image_size
+  @@ fun (w, h) ->
+  Images.outline
+    I.(
+      hsnap (w - 2)
+      @@ vsnap (h - 3)
+      @@ (* +1 for the prompt *)
+      Images.sierp 5)
+;;
