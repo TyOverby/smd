@@ -9,6 +9,7 @@ opam install       \
   dune             \
   core             \
   merlin           \
+  bignum           \
   ppx_jane         \
   incr_map         \
   ocamlformat      \
