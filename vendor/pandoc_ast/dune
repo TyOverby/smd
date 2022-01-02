@@ -1,0 +1,3 @@
+(library
+ (name pandoc_ast)
+ (libraries yojson))

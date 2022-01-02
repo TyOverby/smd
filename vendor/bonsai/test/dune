@@ -1,0 +1,12 @@
+(library 
+  (name bonsai_test) 
+  (libraries 
+    bonsai
+    bonsai_extra
+    core_kernel.composition_infix
+    core
+    expect_test_helpers_core
+    incr_map
+    re)
+  (inline_tests)
+  (preprocess (pps ppx_jane ppx_pattern_bind)))

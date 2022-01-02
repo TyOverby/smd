@@ -1,0 +1,4 @@
+(library
+ (name pandoc_ast_jane)
+ (libraries pandoc_ast core)
+ (preprocess (pps ppx_jane)))

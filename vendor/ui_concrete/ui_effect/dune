@@ -1,0 +1,4 @@
+(library 
+  (name ui_effect) 
+  (libraries core) 
+  (preprocess (pps ppx_jane)))

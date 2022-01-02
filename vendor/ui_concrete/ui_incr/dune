@@ -1,0 +1,4 @@
+(library 
+  (name ui_incr)
+  (libraries core incremental incr_map incr_select)
+  (preprocess (pps ppx_jane)))
