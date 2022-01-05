@@ -446,18 +446,4 @@ include More
 
 module Block = struct
   include Block'
-
-  let sexp_of_t = function
-    | BulletList list_items ->
-      let items = List.map list_items ~f:List_item.reveal in
-      [%sexp BulletList (items : List_item.details list)]
-    | other -> sexp_of_t other
-  ;;
 end
-
-type nonrec t = t =
-  { api_version : int list [@sexp.list]
-  ; meta : Yojson_with_sexp.t
-  ; blocks : Block.t list [@sexp.list]
-  }
-[@@deriving sexp, equal, quickcheck, compare]

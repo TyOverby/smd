@@ -149,14 +149,12 @@ let%expect_test "big ast" =
            (((Plain (Str nested))) ((Plain (Str here))))))
          ((Plain (Str back) Space (Str out)))))
        (Header 1 (bulleted-lists () ()) ((Str Bulleted) Space (Str Lists)))
-       (BulletList
-        ((Normal (Plain (Str a) Space (Str bulleted)))
-         (Normal (Plain (Str list) Space (Str is))
-          (BulletList ((Plain (Str nested))) ((Plain (Str here)))))
-         (Normal
-          (Plain (Str back) Space (Str out) (UnhandledInline SoftBreak)
-           (Str this) Space (Str one) Space (Str has) (UnhandledInline SoftBreak)
-           (Str some) Space (Str overhang)))))))) |}]
+       (BulletList ((Plain (Str a) Space (Str bulleted)))
+        ((Plain (Str list) Space (Str is))
+         (BulletList ((Plain (Str nested))) ((Plain (Str here)))))
+        ((Plain (Str back) Space (Str out) (UnhandledInline SoftBreak) (Str this)
+          Space (Str one) Space (Str has) (UnhandledInline SoftBreak) (Str some)
+          Space (Str overhang))))))) |}]
 ;;
 
 let%expect_test "more bullets ast" =
@@ -179,11 +177,10 @@ let%expect_test "more bullets ast" =
     ((api_version (1 22 1)) (meta (Assoc))
      (blocks
       ((BulletList
-        ((Unchecked
-          (Para (Str "\226\152\144") Space (Str normal) Space (Str item))
-          (Para (Str more))
-          (BulletList ((Plain (Str "\226\152\144") Space (Str unfinished)))
-           ((Plain (Str "\226\152\146") Space (Str finished)))))))
+        ((Para (Str "\226\152\144") Space (Str normal) Space (Str item))
+         (Para (Str more))
+         (BulletList ((Plain (Str "\226\152\144") Space (Str unfinished)))
+          ((Plain (Str "\226\152\146") Space (Str finished))))))
        (OrderedList (1 Decimal Period)
         (((Plain (Str "\226\152\144") Space (Str unfinished)))
          ((Plain (Str "\226\152\146") Space (Str finished)))))))) |}]
@@ -208,11 +205,10 @@ let%expect_test "checkboxes in other places" =
      (blocks
       ((Para (Str [) Space (Str ]))
        (BulletList
-        ((Unchecked
-          (Plain (Str "\226\152\144") Space (Str normal) Space (Str [) Space
-           (Str ]) Space (Str item))
-          (BulletList ((Plain (Str hi) Space (Str [) Space (Str ])))))
-         Empty))))) |}]
+        ((Plain (Str "\226\152\144") Space (Str normal) Space (Str [) Space
+          (Str ]) Space (Str item))
+         (BulletList ((Plain (Str hi) Space (Str [) Space (Str ])))))
+        ())))) |}]
 ;;
 
 let%expect_test "checkboxe kinds" =
