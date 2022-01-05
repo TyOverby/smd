@@ -87,29 +87,30 @@ module Inline : sig
   [@@deriving sexp, equal, quickcheck, compare]
 end
 
-module Block : sig
+module rec List_item : sig
+  type t
+  type details [@@deriving sexp, equal, quickcheck, compare]
+
+  val kind : details -> [ `Checked | `Normal | `Unchecked ]
+  val reveal : t -> details
+  val conceal : details -> t
+  val check : details -> details
+  val uncheck : details -> details
+  val remove_checkbox : details -> details
+end
+
+and Block : sig
   type t =
-    | BulletList of t list list
+    | BulletList of List_item.t list
     | CodeBlock of Attrs.t * string
     | Header of int * Attrs.t * Inline.t list
-    | OrderedList of Ordered_list_attrs.t * t list list
+    | OrderedList of Ordered_list_attrs.t * List_item.t list
     | Para of Inline.t list
     | Plain of Inline.t list
     | RawBlock of string * string
     | Div of Attrs.t * t list
     | UnhandledBlock of Yojson.Basic.t
   [@@deriving sexp, equal, quickcheck, compare]
-end
-
-module List_item : sig
-  type t [@@deriving sexp, equal, quickcheck, compare]
-
-  val kind : t -> [ `Checked | `Normal | `Unchecked ]
-  val of_blocks : Block.t list -> t
-  val to_blocks : t -> Block.t list
-  val check : t -> t
-  val uncheck : t -> t
-  val remove_checkbox : t -> t
 end
 
 type t [@@deriving sexp, equal, quickcheck, compare]
@@ -150,3 +151,5 @@ val folding_map
   -> init:'a
   -> t
   -> t
+
+val iter : ?inline:(Inline.t -> unit) -> ?block:(Block.t -> unit) -> t -> unit
