@@ -1,5 +1,5 @@
 (executables
  (names main)
- (libraries bonsai_extra bonsai_term notty bignum)
+ (libraries core)
  (preprocess
   (pps ppx_jane)))
