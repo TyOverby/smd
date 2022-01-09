@@ -1,5 +1,6 @@
 open! Core
 include Types
+module To_html = To_html
 
 let union_of_list = List.fold ~init:Name.Set.empty ~f:Set.union
 

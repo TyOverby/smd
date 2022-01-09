@@ -3,6 +3,8 @@ open! Core
 module Name : sig
   type t
 
+  val to_string : t -> string
+
   include Comparable.S with type t := t
 end
 

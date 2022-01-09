@@ -15,3 +15,7 @@ module Computation : sig
   val return : Value.t -> t
   val wrap : name:string -> introduces:Name.t list -> bodies:t list -> t
 end
+
+module To_html : sig
+  val to_html : Computation.t -> string
+end

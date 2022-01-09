@@ -4,11 +4,12 @@ module Name = struct
   module T = Unique_id.Int ()
   include T
   include Comparable.Make (T)
+
+  let to_string t = "name_" ^ to_string t
 end
 
-(* This bullshit recursive type / recursive module 
-   structure is required in order to get sexp-deriving 
-   to work correctly *)
+(* This ugly recursive type / recursive module structure is 
+   required in order to get sexp-deriving to work correctly *)
 
 type kind =
   | Bindings of binding list
