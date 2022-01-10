@@ -81,7 +81,7 @@ let value_to_html ~point_to value =
   N.div ~attr:(A.many [ A.classes [ "vbox" ] ]) rows
 ;;
 
-let compare_bindings
+let compare_bindings_for_grouping
     { Binding.bound = bound1; as_ = as1 }
     { Binding.bound = bound2; as_ = as2 }
   =
@@ -92,6 +92,15 @@ let compare_bindings
   else 0
 ;;
 
+let compare_bindings_for_sorting
+    { Binding.as_ = as1; bound = { free_variables = f1; _ } }
+    { Binding.as_ = as2; bound = { free_variables = f2; _ } }
+  =
+  match Name.compare as1 as2 with
+  | 0 -> Name.Set.compare f1 f2
+  | other -> other
+;;
+
 let rec computation_to_html ~point_to (c : Computation.t) =
   match c with
   | { kind = Value v; free_variables = _ } ->
@@ -100,9 +109,10 @@ let rec computation_to_html ~point_to (c : Computation.t) =
       [ value_to_html ~point_to v ]
   | { kind = Bindings { bindings; last_body }; free_variables = _ } ->
     { Binding.bound = last_body; as_ = point_to } :: bindings
-    |> List.sort_and_group ~compare:compare_bindings
+    |> List.sort_and_group ~compare:compare_bindings_for_grouping
     |> List.map ~f:(fun row ->
            row
+           |> List.sort ~compare:compare_bindings_for_sorting
            |> List.map ~f:(fun { as_; bound } -> computation_to_html bound ~point_to:as_)
            |> N.div ~attr:(A.classes [ "hbox" ]))
     |> N.div ~attr:(A.classes [ "vbox" ])

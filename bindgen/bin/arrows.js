@@ -106,6 +106,39 @@ function run(node) {
     }
   }
   canvas.innerHTML = arrows;
+
+  var scale = 1.0;
+  var tx = 0.0;
+  var ty = 0.0;
+  content.addEventListener('wheel', function(event) {
+    event.preventDefault();
+    scale += event.deltaY * -0.01;
+
+    scale = Math.min(Math.max(.125, scale), 4);
+    node.style.transform = `scale(${scale}) translate(${tx}px,${ty}px)`;
+  });
+  content.addEventListener('mousedown', function() {
+    down = true;
+  });
+
+  function onmove(event) {
+    tx += event.movementX;
+    ty += event.movementY;
+    let w = content.clientWidth;
+    let h = content.clientHeight;
+    node.style.transformOrigin = `${tx + w/2}px ${ty + h/2}px`;
+    node.style.transform = `scale(${scale}) translate(${tx}px,${ty}px)`;
+    console.log({w,h});
+  }
+
+  function ondown() {
+    content.addEventListener('mousemove',onmove);
+    document.addEventListener('mouseup', function() {
+      content.removeEventListener('mousemove', onmove);
+    }, { once: true });
+  }
+
+  content.addEventListener('mousedown', ondown);
 }
 
 
