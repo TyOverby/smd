@@ -4,13 +4,17 @@ module Name : sig
   type t
 
   val to_string : t -> string
+  val create : unit -> t
 
   include Comparable.S with type t := t
 end
 
 module rec Kind : sig
   type t =
-    | Bindings of Binding.t list
+    | Bindings of
+        { bindings : Binding.t list
+        ; last_body : Computation.t
+        }
     | Value of Value.t
     | Wrapping of
         { name : string
@@ -23,7 +27,6 @@ and Binding : sig
   type t =
     { bound : Computation.t
     ; as_ : Name.t
-    ; for_ : Computation.t
     }
   [@@deriving sexp]
 end
@@ -31,6 +34,7 @@ end
 and Value : sig
   type t =
     | Named of Name.t
+    | Singleton
     | Mapn of Value.t list
 end
 

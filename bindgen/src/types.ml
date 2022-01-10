@@ -12,7 +12,10 @@ end
    required in order to get sexp-deriving to work correctly *)
 
 type kind =
-  | Bindings of binding list
+  | Bindings of
+      { bindings : binding list
+      ; last_body : computation
+      }
   | Value of value
   | Wrapping of
       { name : string
@@ -23,11 +26,11 @@ type kind =
 and binding =
   { bound : computation
   ; as_ : Name.t
-  ; for_ : computation
   }
 
 and value =
   | Named of Name.t
+  | Singleton
   | Mapn of value list
 
 and computation =
@@ -38,7 +41,10 @@ and computation =
 
 module rec Kind : sig
   type t = kind =
-    | Bindings of binding list
+    | Bindings of
+        { bindings : binding list
+        ; last_body : computation
+        }
     | Value of value
     | Wrapping of
         { name : string
@@ -53,7 +59,6 @@ and Binding : sig
   type t = binding =
     { bound : computation
     ; as_ : Name.t
-    ; for_ : computation
     }
   [@@deriving sexp]
 end =
@@ -62,6 +67,7 @@ end =
 and Value : sig
   type t = value =
     | Named of Name.t
+    | Singleton
     | Mapn of t list
   [@@deriving sexp]
 end =

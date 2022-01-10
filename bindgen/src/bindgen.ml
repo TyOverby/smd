@@ -14,9 +14,12 @@ module Value = struct
 
   let rec free_vars = function
     | Named name -> Name.Set.singleton name
+    | Singleton -> Name.Set.empty
     | Mapn names ->
       names |> List.map ~f:free_vars |> List.fold ~init:Name.Set.empty ~f:Set.union
   ;;
+
+  let singleton () = Singleton
 end
 
 module Computation = struct
@@ -33,7 +36,13 @@ module Computation = struct
   ;;
 
   let sub ~bound ~as_ ~for_ =
-    let kind = Kind.Bindings [ { Binding.bound; as_; for_ } ] in
+    let my_binding = { Binding.bound; as_ } in
+    let bindings, last_body =
+      match for_.kind with
+      | Bindings { bindings; last_body } -> my_binding :: bindings, last_body
+      | _ -> [ my_binding ], for_
+    in
+    let kind = Kind.Bindings { bindings; last_body } in
     let free_var_bound = free_variables bound in
     let free_var_for = Name.Set.remove (free_variables for_) as_ in
     let free_variables = Name.Set.union free_var_bound free_var_for in

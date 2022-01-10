@@ -1,11 +1,17 @@
 open! Core
-module Name : T
+
+module Name : sig
+  type t
+
+  val create : unit -> t
+end
 
 module Value : sig
   type t
 
   val named : Name.t -> t
   val mapn : t list -> t
+  val singleton : unit -> t
 end
 
 module Computation : sig

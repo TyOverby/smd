@@ -1,5 +1,10 @@
 (executables
  (names main)
- (libraries core)
+ (libraries bindgen core)
  (preprocess
   (pps ppx_jane)))
+
+(rule 
+  (targets test.html)
+  (deps main.exe style.css arrows.js)
+  (action (bash "./main.exe > test.html")))
