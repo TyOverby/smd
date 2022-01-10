@@ -116,10 +116,7 @@ function run(node) {
 
     scale = Math.min(Math.max(.125, scale), 4);
     node.style.transform = `scale(${scale}) translate(${tx}px,${ty}px)`;
-  });
-  content.addEventListener('mousedown', function() {
-    down = true;
-  });
+  }, { capture:true, passive:false });
 
   function onmove(event) {
     tx += event.movementX;
@@ -132,7 +129,7 @@ function run(node) {
   }
 
   function ondown() {
-    content.addEventListener('mousemove',onmove);
+    content.addEventListener('mousemove',onmove, );
     document.addEventListener('mouseup', function() {
       content.removeEventListener('mousemove', onmove);
     }, { once: true });

@@ -75,7 +75,7 @@ let () =
          ~as_:b
          ~for_:
            (Computation.return
-              (Value.mapn [ Value.named a; Value.named a; Value.named b ])))
+              (Value.mapn [ Value.named a; Value.mapn [ Value.named a ]; Value.named b ])))
   |> print "sub"
 ;;
 
