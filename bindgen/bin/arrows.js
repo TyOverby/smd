@@ -10,17 +10,23 @@ function box(e) {
 
 function linep(from, to, width) {
   width = width || 1;
-  return `
-      <line x1="${from.x}" 
+  return `<line 
+            x1="${from.x}" 
             y1="${from.y}" 
             x2="${to.x}" 
             y2="${to.y}" 
             stroke-width="${width}px"
             stroke="rgb(50,50,50)"
+            stroke-linecap="round" />`
+}
+
+function curvep(from, to, from_a, to_a) {
+ return `<path
+            stroke="rgba(50,50,50)"
+            stroke-width="2px"
+            fill="transparent"
             stroke-linecap="round"
-            />
-      `
-// stroke="rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})"
+            d="M ${from.x} ${from.y} C ${from_a.x} ${from_a.y}, ${to_a.x} ${to_a.y}, ${to.x} ${to.y}" />`
 }
 
 function line(from, to, width) {
@@ -60,19 +66,37 @@ function angle({x,y}) {
 start_squeeze = 0.9;
 prog_squeeze = 0.9;
 
+function curve_from_redirect(f, t) {
+  let from = {x:f.midx, y:f.midy};
+  let to = {x:t.midx, y:t.midy};
+  let l = length(sub(from, to)) / 2;
+  let from_a = add(from, {x:0, y:l});
+  let to_a = to;
+  return curvep(from, to, from_a, to_a);
+}
+
+function curve_to_redirect(f, t) {
+  let from = { x: f.midx, y: f.midy };
+  let to = { x: t.midx, y: t.midy };
+  let half = midpoint(to, midpoint(to, from));
+  let to_a = add(to, {x:0, y:-3});
+  let from_a = sub(half, scale(norm(sub(from, to)), 3));
+  return curvep(from, half, from, midpoint(to, from)) +
+         curvep(half, to, from_a, to_a);
+}
+
 function sqwoosh(from, to) {
   let out = '';
-  out += line(from, to, 2);
 
   let start = {x: from.midx, y:from.midy };
   let end = {x: to.midx, y:to.midy };
   let v = norm(sub(end, start));
   let [a, b] = perp(v);
-  start = add(start, scale(v, to.width/2));
-  end = add(start, scale(v, 10*Math.log10(length(end, start))));
-  let radius = to.width / 2.0;
-  for (var dist = 1; dist < radius; dist += 1) { 
-    let rat = dist / (to.width / 2);
+  let radius = from.width / 2.0;
+  start = add(start, scale(v, radius));
+  end = add(start, scale(v, 15));
+  for (var dist = 0; dist < radius; dist += 1) { 
+    let rat = dist / radius;
     let p = add(start, scale(a, dist));
     let fac = (rat * rat * rat);
     p = add(p, scale(v, -fac * radius));
@@ -99,10 +123,22 @@ function run(node) {
   for (let provider of providers) {
     let provider_box = box(provider);
     let name = provider.getAttribute('data-src-name');
+    let provider_kind = provider.getAttribute('data-kind');
     let subscribers = Array.from(content.querySelectorAll(`.dest-class-${name}`));
     for (let subscriber of subscribers) {
       let subscriber_box = box(subscriber);
-      arrows += sqwoosh(provider_box, subscriber_box);
+      let subscriber_kind = subscriber.getAttribute('data-kind');
+      if (provider_kind === 'redirect') {
+        // arrows += line(provider_box, subscriber_box, 2);
+        arrows += curve_from_redirect(provider_box, subscriber_box);
+      } else {
+        arrows += sqwoosh(provider_box, subscriber_box);
+        if (subscriber_kind === 'redirect') {
+          arrows += curve_to_redirect(provider_box, subscriber_box, 2);
+        } else {
+          arrows += line(provider_box, subscriber_box, 2);
+        }
+      }
     }
   }
   canvas.innerHTML = arrows;
@@ -137,7 +173,6 @@ function run(node) {
 
   content.addEventListener('mousedown', ondown);
 }
-
 
 function go() {
   requestAnimationFrame(function () {

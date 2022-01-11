@@ -6,5 +6,5 @@
 
 (rule 
   (targets test.html)
-  (deps main.exe style.css arrows.js)
+  (deps main.exe main.ml style.css arrows.js)
   (action (bash "./main.exe > test.html")))

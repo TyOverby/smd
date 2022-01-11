@@ -3,7 +3,7 @@ open! Core
 module Name = struct
   module T = Unique_id.Int ()
   include T
-  include Comparable.Make (T)
+  include Comparable.Make_binable (T)
 
   let to_string t = "name_" ^ to_string t
 end
@@ -29,6 +29,7 @@ and binding =
   }
 
 and value =
+  | Redirect of Name.t
   | Named of Name.t
   | Singleton
   | Mapn of value list
@@ -66,6 +67,7 @@ end =
 
 and Value : sig
   type t = value =
+    | Redirect of Name.t
     | Named of Name.t
     | Singleton
     | Mapn of t list

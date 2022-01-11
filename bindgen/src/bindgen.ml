@@ -13,6 +13,7 @@ module Value = struct
   let mapn values = Mapn values
 
   let rec free_vars = function
+    | Redirect name -> Name.Set.singleton name
     | Named name -> Name.Set.singleton name
     | Singleton -> Name.Set.empty
     | Mapn names ->

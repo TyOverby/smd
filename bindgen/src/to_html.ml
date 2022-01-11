@@ -22,6 +22,18 @@ let rec value_to_html ~point_to (me : Value.t) =
           []
       ]
     ]
+  | Redirect name ->
+    [ [ N.div
+          ~attr:
+            (A.many
+               [ A.classes [ "value" ]
+               ; A.data "kind" "redirect"
+               ; conn `Provide point_to
+               ; conn `Consume name
+               ])
+          []
+      ]
+    ]
   | Named name ->
     [ [ N.div
           ~attr:
@@ -81,26 +93,6 @@ let value_to_html ~point_to value =
   N.div ~attr:(A.many [ A.classes [ "vbox" ] ]) rows
 ;;
 
-let compare_bindings_for_grouping
-    { Binding.bound = bound1; as_ = as1 }
-    { Binding.bound = bound2; as_ = as2 }
-  =
-  if Set.mem bound2.free_variables as1
-  then -1
-  else if Set.mem bound1.free_variables as2
-  then 1
-  else 0
-;;
-
-let compare_bindings_for_sorting
-    { Binding.as_ = as1; bound = { free_variables = f1; _ } }
-    { Binding.as_ = as2; bound = { free_variables = f2; _ } }
-  =
-  match Name.compare as1 as2 with
-  | 0 -> Name.Set.compare f1 f2
-  | other -> other
-;;
-
 let rec computation_to_html ~point_to (c : Computation.t) =
   match c with
   | { kind = Value v; free_variables = _ } ->
@@ -108,13 +100,11 @@ let rec computation_to_html ~point_to (c : Computation.t) =
       ~attr:(A.many [ A.classes [ "computation" ]; A.data "kind" "return" ])
       [ value_to_html ~point_to v ]
   | { kind = Bindings { bindings; last_body }; free_variables = _ } ->
-    { Binding.bound = last_body; as_ = point_to } :: bindings
-    |> List.sort_and_group ~compare:compare_bindings_for_grouping
+    Transform.organize_bindings bindings ~last_body ~point_to
     |> List.map ~f:(fun row ->
-           row
-           |> List.sort ~compare:compare_bindings_for_sorting
-           |> List.map ~f:(fun { as_; bound } -> computation_to_html bound ~point_to:as_)
-           |> N.div ~attr:(A.classes [ "hbox" ]))
+           List.map row ~f:(fun { Binding.as_; bound } ->
+               computation_to_html ~point_to:as_ bound))
+    |> List.map ~f:(N.div ~attr:(A.classes [ "hbox" ]))
     |> N.div ~attr:(A.classes [ "vbox" ])
   | _ -> assert false
 ;;

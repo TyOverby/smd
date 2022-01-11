@@ -6,7 +6,8 @@ module Name : sig
   val to_string : t -> string
   val create : unit -> t
 
-  include Comparable.S with type t := t
+  include Comparable.S_binable with type t := t
+  include Sexpable.S with type t := t
 end
 
 module rec Kind : sig
@@ -33,6 +34,7 @@ end
 
 and Value : sig
   type t =
+    | Redirect of Name.t
     | Named of Name.t
     | Singleton
     | Mapn of Value.t list
