@@ -105,8 +105,9 @@ body {
 }
 
 .sub {
-  border: 1px solid red;
-  border: none;
+  border: 1px dashed red;
+  padding: 0.25em;
+  border-radius:0.25em;
 }
 
 .vbox, .hbox {
