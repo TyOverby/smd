@@ -14,6 +14,7 @@ module Node : sig
   type t
   type creator := ?attr:Attr.t -> t list -> t
 
+  val none : t
   val text : string -> t
   val svg : creator
   val div : creator

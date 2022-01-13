@@ -24,6 +24,8 @@ module Node = struct
   type t = string list list
   type creator = ?attr:Attr.t -> t list -> t
 
+  let none = []
+
   let create : string -> creator =
    fun tag ?(attr = Attr.empty) children ->
     let children = children |> List.join |> List.map ~f:(fun xs -> "  " :: xs) in

@@ -1,23 +1,24 @@
 open! Core
 open! Bindgen
 
-let t = Computation.return (Value.singleton ())
-
 module Let_syntax = struct
   module Let_syntax = struct
-    let sub : ?here:_ -> Computation.t -> f:(Value.t -> Computation.t) -> Computation.t =
-     fun ?here:_ t ~f ->
+    let sub
+        :  ?here:_ -> (unit -> Computation.t) -> f:(Value.t -> unit -> Computation.t)
+        -> unit -> Computation.t
+      =
+     fun ?here:_ t ~f () ->
       let name = Name.create () in
-      Computation.sub ~bound:t ~as_:name ~for_:(f (Value.named name))
+      Computation.sub ~bound:(t ()) ~as_:name ~for_:(f (Value.named name) ())
    ;;
 
-    let return = Computation.return
-    let map a ~f:_ = return (Value.mapn [ a ])
-    let map2 a b ~f:_ = return (Value.mapn [ a; b ])
-    let map3 a b c ~f:_ = return (Value.mapn [ a; b; c ])
+    let map a ~f:_ () = Computation.return (Value.mapn [ a ])
+    let map2 a b ~f:_ () = Computation.return (Value.mapn [ a; b ])
+    let map3 a b c ~f:_ () = Computation.return (Value.mapn [ a; b; c ])
+    let return t () = Computation.return t
   end
 
-  let return = Computation.return
+  let return = Let_syntax.return
 end
 
 open Let_syntax
@@ -28,6 +29,8 @@ let print name t =
   print_endline (To_html.to_html t);
   print_endline "</div>"
 ;;
+
+let print' name t = print name (t ())
 
 let () =
   print_endline
@@ -85,12 +88,15 @@ let () =
 let () =
   (let%sub a = return (Value.singleton ()) in
    let%sub b = return (Value.singleton ()) in
-   Computation.return (Value.mapn [ a; Value.mapn [ a ]; b ]))
-  |> print "sub 3"
+   return (Value.mapn [ a; Value.mapn [ a ]; b ]))
+  |> print' "sub 3"
 ;;
 
 let () =
-  (let%sub a = return (Value.singleton ()) in
+  (let%sub a =
+     let%mapn _ = Value.singleton () in
+     ()
+   in
    let%sub b = return (Value.singleton ()) in
    let%sub c =
      let%mapn _ = a
@@ -101,7 +107,54 @@ let () =
    and _ = b
    and _ = c in
    ())
-  |> print "sub and arr"
+  |> print' "sub and arr"
+;;
+
+let () =
+  (let%sub a = return (Value.singleton ()) in
+   let%sub b = return (Value.singleton ()) in
+   let%sub c =
+     let%mapn _ = a
+     and _ = b in
+     ()
+   in
+   let%sub c =
+     let%mapn _ = c
+     and _ = a in
+     ()
+   in
+   let%mapn _ = a
+   and _ = b
+   and _ = c in
+   ())
+  |> print' "sub and arr 2"
+;;
+
+let () =
+  let x =
+    let%sub a = return (Value.singleton ()) in
+    let%sub b = return (Value.singleton ()) in
+    let%sub c =
+      let%mapn _ = a
+      and _ = b in
+      ()
+    in
+    let%sub c =
+      let%mapn _ = c
+      and _ = a in
+      ()
+    in
+    let%mapn _ = a
+    and _ = b
+    and _ = c in
+    ()
+  in
+  (let%sub a = x in
+   let%sub b = x in
+   let%mapn _ = a
+   and _ = b in
+   ())
+  |> print' "sub and arr 2"
 ;;
 
 let () = print_endline {|

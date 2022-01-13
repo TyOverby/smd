@@ -3,6 +3,14 @@ open! Types
 module N = Vdom.Node
 module A = Vdom.Attr
 
+let box t = function
+  | [] -> Vdom.Node.none
+  | [ child ] -> child
+  | children -> N.div ~attr:(A.class_ t) children
+;;
+
+let vbox, hbox = box "hbox", box "vbox"
+
 let conn kind name =
   match kind with
   | `Provide -> A.data "src-name" (Name.to_string name)
@@ -85,27 +93,30 @@ let rec value_to_html ~point_to (me : Value.t) =
 ;;
 
 let value_to_html ~point_to value =
-  let rows =
-    value
-    |> value_to_html ~point_to
-    |> List.rev_map ~f:(fun l -> N.div ~attr:(A.many [ A.classes [ "hbox" ] ]) l)
-  in
-  N.div ~attr:(A.many [ A.classes [ "vbox" ] ]) rows
+  value |> value_to_html ~point_to |> List.rev_map ~f:hbox |> vbox
 ;;
 
 let rec computation_to_html ~point_to (c : Computation.t) =
   match c with
-  | { kind = Value v; free_variables = _ } ->
-    N.div
-      ~attr:(A.many [ A.classes [ "computation" ]; A.data "kind" "return" ])
-      [ value_to_html ~point_to v ]
+  | { kind = Value v; free_variables = _ } -> value_to_html ~point_to v
+  | { kind = Bindings { bindings = []; last_body }; free_variables = _ } ->
+    computation_to_html ~point_to last_body
   | { kind = Bindings { bindings; last_body }; free_variables = _ } ->
     Transform.organize_bindings bindings ~last_body ~point_to
-    |> List.map ~f:(fun row ->
-           List.map row ~f:(fun { Binding.as_; bound } ->
-               computation_to_html ~point_to:as_ bound))
-    |> List.map ~f:(N.div ~attr:(A.classes [ "hbox" ]))
-    |> N.div ~attr:(A.classes [ "vbox" ])
+    |> List.map ~f:(function
+           | [] -> Vdom.Node.none
+           | [ { as_; bound } ] -> computation_to_html ~point_to:as_ bound
+           | row ->
+             row
+             |> List.map ~f:(function
+                    | { Binding.as_; bound = { kind = Value v; _ } } ->
+                      value_to_html v ~point_to:as_
+                    | { Binding.as_; bound } ->
+                      N.div
+                        ~attr:(A.class_ "sub")
+                        [ computation_to_html ~point_to:as_ bound ])
+             |> hbox)
+    |> vbox
   | _ -> assert false
 ;;
 

@@ -94,9 +94,11 @@ let organize_bindings (bindings : Binding.t list) =
                   ; as_ = to_
                   })
          in
-         down_row :: rows, redirections @ row, missing_here)
-  |> (fun (rows, last_row, _) -> last_row :: rows)
-  |> List.map ~f:(List.sort ~compare:compare_bindings_for_sorting)
+         let this_row_including_redirections =
+           redirections @ row |> List.sort ~compare:compare_bindings_for_sorting
+         in
+         down_row :: rows, this_row_including_redirections, missing_here)
+  |> fun (rows, last_row, _) -> last_row :: rows
 ;;
 
 let organize_bindings
