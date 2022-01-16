@@ -1,4 +1,5 @@
 open! Core
+module Vdom = Vdom
 
 module Name : sig
   type t

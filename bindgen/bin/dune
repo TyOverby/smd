@@ -1,10 +1,15 @@
 (executables
- (names main)
+ (names binding blocks)
  (libraries bindgen core)
  (preprocess
   (pps ppx_jane)))
 
 (rule 
-  (targets test.html)
-  (deps main.exe main.ml style.css arrows.js)
-  (action (bash "./main.exe > test.html")))
+  (target binding.html)
+  (deps binding.exe)
+  (action (bash "./binding.exe > %{target}")))
+
+(rule 
+  (target boxtest.html)
+  (deps blocks.exe style.css arrows.js)
+  (action (bash "./blocks.exe > %{target}")))
