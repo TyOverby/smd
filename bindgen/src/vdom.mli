@@ -45,6 +45,12 @@ module Svg : sig
           ; end_handle : Vec2.t
           ; dest : Vec2.t
           }
+      | Arc_to of
+          { radius : float
+          ; large_arc : bool
+          ; sweep : bool
+          ; dest : Vec2.t
+          }
     [@@deriving sexp]
   end
 

@@ -27,7 +27,8 @@ module V = struct
   let sub { x = x1; y = y1 } { x = x2; y = y2 } = { x = x1 -. x2; y = y1 -. y2 }
   let add { x = x1; y = y1 } { x = x2; y = y2 } = { x = x1 +. x2; y = y1 +. y2 }
   let cross { x = x1; y = y1 } { x = x2; y = y2 } = (x1 *. y2) -. (y1 *. x2)
-  let angle { x; y } = Float.atan2 x y
+  let angle { x; y } = Float.atan2 y x
+  let of_angle theta = { x = Float.cos theta; y = Float.sin theta }
   let swap { x; y } = { x = y; y = -.x }
 
   module Infix = struct
@@ -160,6 +161,61 @@ module Example1 = struct
   ;;
 end
 
+module Example2 = struct
+  open! V
+  open! V.Infix
+
+  let c_mid = { x = 15.0; y = 15.0 }
+  let c_rad = 10.0
+
+  let transl offset =
+    let dx, dy = offset in
+    sprintf "translate(%.3f, %.3f)" dx dy
+  ;;
+
+  let shape ~offset target =
+    let intersection = (norm (target - c_mid) *. c_rad) + c_mid in
+    let join_point = midpoint intersection target in
+    let theta = angle (join_point - c_mid) in
+    let delta_theta =
+      Float.acos (c_rad /. (c_rad +. length (join_point - intersection)))
+    in
+    let p1 = (of_angle (theta -. delta_theta) *. c_rad) + c_mid in
+    let p2 = (of_angle (theta +. delta_theta) *. c_rad) + c_mid in
+    let curve ~stroke ~fill =
+      S.path
+        ~stroke
+        ~fill
+        [ Move p1
+        ; Bezier_to
+            { start_handle = midpoint p1 (midpoint p1 join_point)
+            ; end_handle = intersection
+            ; dest = join_point
+            }
+        ; Bezier_to
+            { start_handle = intersection
+            ; end_handle = midpoint p2 (midpoint p2 join_point)
+            ; dest = p2
+            }
+        ; Arc_to { radius = c_rad; dest = p1; large_arc = false; sweep = false }
+        ]
+    in
+    S.group
+      ~transforms:[ "translate(10, 10)"; transl offset ]
+      [ S.circle ~stroke:(S.Stroke.create ~color:"black" ()) ~fill:"black" c_mid ~r:c_rad
+      ; curve ~stroke:(S.Stroke.create ~color:"black" ()) ~fill:"black"
+        (*
+      ; S.group
+          [ S.circle target ~r:1.5 ~fill:"red"
+          ; S.circle intersection ~r:1.5 ~fill:"green"
+          ; S.circle join_point ~r:1.5 ~fill:"blue"
+          ; S.circle p1 ~r:1.5 ~fill:"pink"
+          ; S.circle p2 ~r:1.5 ~fill:"purple"
+          ] *)
+      ]
+  ;;
+end
+
 let shape =
   V.
     [ { x = 60.0; y = 15.0 }
@@ -169,7 +225,7 @@ let shape =
     ; { x = 15.0; y = 60.0 }
     ]
   |> List.folding_map ~init:0.0 ~f:(fun acc pt ->
-         let out = Example1.shape ~offset:(0.0, acc) pt in
+         let out = Example2.shape ~offset:(0.0, acc) pt in
          let bump = acc +. Float.max 30.0 pt.y +. 5.0 in
          bump, out)
   |> N.svg

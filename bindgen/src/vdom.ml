@@ -89,6 +89,12 @@ module Svg = struct
           ; end_handle : Vec2.t
           ; dest : Vec2.t
           }
+      | Arc_to of
+          { radius : float
+          ; large_arc : bool
+          ; sweep : bool
+          ; dest : Vec2.t
+          }
     [@@deriving sexp]
   end
 
@@ -133,6 +139,12 @@ module Svg = struct
                  } ->
                [%string
                  "C %{f_h_x#Float} %{f_h_y#Float}, %{t_h_x#Float} %{t_h_y#Float}, \
+                  %{x#Float} %{y#Float}"]
+             | Arc_to { radius; large_arc; sweep; dest = { x; y } } ->
+               let large_arc = if large_arc then 1 else 0 in
+               let sweep = if sweep then 1 else 0 in
+               [%string
+                 "A %{radius#Float} %{radius#Float} 0 %{large_arc#Int} %{sweep#Int} \
                   %{x#Float} %{y#Float}"])
       |> String.concat ~sep:" "
     in
