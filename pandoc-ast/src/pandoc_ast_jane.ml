@@ -113,6 +113,7 @@ end
 
 module Block' = struct
   type t = P.block =
+    | Blockquote of t list
     | BulletList of t list list [@sexp.list]
     | CodeBlock of Attrs.t * string
     | Header of int * Attrs.t * Inline.t list
@@ -159,6 +160,7 @@ module More = struct
       block b
       ||
       match b with
+      | Blockquote blocks -> blocks |> List.exists ~f:visit_block
       | BulletList blocks -> blocks |> List.exists ~f:(List.exists ~f:visit_block)
       | Header (_, _, inlines) -> List.exists inlines ~f:visit_inline
       | OrderedList (_, blocks) -> blocks |> List.exists ~f:(List.exists ~f:visit_block)
@@ -185,6 +187,7 @@ module More = struct
       block b
       &&
       match b with
+      | Blockquote blocks -> blocks |> List.for_all ~f:visit_block
       | BulletList blocks -> blocks |> List.for_all ~f:(List.for_all ~f:visit_block)
       | Header (_, _, inlines) -> List.for_all inlines ~f:visit_inline
       | OrderedList (_, blocks) -> blocks |> List.for_all ~f:(List.for_all ~f:visit_block)
@@ -210,6 +213,7 @@ module More = struct
     let rec visit_block (b : Block.t) : Block.t list =
       block
         (match b with
+        | Blockquote blocks -> Block.BulletList (blocks |> List.map ~f:visit_block)
         | BulletList blocks ->
           Block.BulletList (blocks |> List.map ~f:(List.concat_map ~f:visit_block))
         | Header (a, b, inlines) -> Header (a, b, List.concat_map inlines ~f:visit_inline)
@@ -283,6 +287,14 @@ module More = struct
     in
     ()
   ;;
+
+  let fold ~init ?(inline = fun a _ -> a) ?(block = fun a _ -> a) t =
+    let acc = ref init in
+    let inline e = acc := inline !acc e in
+    let block e = acc := block !acc e in
+    iter ~inline ~block t;
+    !acc
+  ;;
 end
 
 module List_item = struct
@@ -298,6 +310,8 @@ module List_item = struct
     | Unchecked of Block.t list [@sexp.list]
     | Checked of Block.t list [@sexp.list]
   [@@deriving sexp, equal, quickcheck, compare]
+
+  let of_blocks b = Normal b
 
   let kind = function
     | Empty -> `Normal
@@ -320,7 +334,8 @@ module List_item = struct
   let reveal (blocks : Block.t list) =
     match blocks with
     | [] -> Empty
-    | ( BulletList _
+    | ( Blockquote _
+      | BulletList _
       | CodeBlock _
       | Header _
       | OrderedList _

@@ -52,6 +52,7 @@ type inline =
   | UnhandledInline of Yojson.Basic.t
 
 and block =
+  | Blockquote of block list
   | BulletList of block list list
   | CodeBlock of attr * string
   | Header of int * attr * inline list
@@ -179,6 +180,9 @@ module JSON = struct
 
   and to_block e =
     match element_type e with
+    | "BlockQuote" ->
+      let l = Util.to_list (element_contents e) in
+      Blockquote (List.map to_block l)
     | "BulletList" ->
       let l = Util.to_list (element_contents e) in
       let l = List.map (fun l -> List.map to_block (Util.to_list l)) l in
@@ -251,6 +255,7 @@ module JSON = struct
   let of_target (url, title) = `List [ `String url; `String title ]
 
   let rec of_block = function
+    | Blockquote l -> element "BlockQuote" (of_blocks l)
     | BulletList l -> element "BulletList" (`List (List.map of_blocks l))
     | CodeBlock (a, s) -> element "CodeBlock" (`List [ of_attr a; `String s ])
     | Header (n, a, t) -> element "Header" (`List [ `Int n; of_attr a; of_inlines t ])
@@ -394,6 +399,7 @@ let map ?(block = fun _ -> None) ?(inline = fun _ -> None) p =
     | None ->
       (match b with
       | BulletList l -> [ BulletList (List.map map_blocks l) ]
+      | Blockquote l -> [ Blockquote (map_blocks l) ]
       | CodeBlock _ -> [ b ]
       | Header (n, a, t) -> [ Header (n, a, map_inlines t) ]
       | OrderedList (la, l) -> [ OrderedList (la, List.map map_blocks l) ]

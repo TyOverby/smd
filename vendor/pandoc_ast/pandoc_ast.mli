@@ -51,6 +51,7 @@ type inline =
 
 (** Block elements. *)
 and block =
+  | Blockquote of block list
   | BulletList of block list list
   | CodeBlock of attr * string
   | Header of int * attr * inline list

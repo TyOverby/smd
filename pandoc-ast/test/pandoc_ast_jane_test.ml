@@ -123,6 +123,157 @@ let%expect_test "folding_map" =
     -   BACK out THIS one HAS some OVERHANG |}]
 ;;
 
+let%expect_test "definition list ast" =
+  {|
+foo
+: from : abc
+: to   : def
+
+bar
+: abc
+         |}
+  |> ast_of_markdown
+  |> Pandoc.of_pandoc_ast_string
+  |> Pandoc.sexp_of_t
+  |> print_s;
+  [%expect
+    {|
+    ((api_version (1 22 1)) (meta (Assoc))
+     (blocks
+      ((UnhandledBlock
+        (Assoc (t (String DefinitionList))
+         (c
+          (List
+           (List (List (Assoc (t (String Str)) (c (String foo))))
+            (List
+             (List
+              (Assoc (t (String Plain))
+               (c
+                (List (Assoc (t (String Str)) (c (String from)))
+                 (Assoc (t (String Space)))
+                 (Assoc (t (String Str)) (c (String :)))
+                 (Assoc (t (String Space)))
+                 (Assoc (t (String Str)) (c (String abc)))))))
+             (List
+              (Assoc (t (String Plain))
+               (c
+                (List (Assoc (t (String Str)) (c (String to)))
+                 (Assoc (t (String Space)))
+                 (Assoc (t (String Str)) (c (String :)))
+                 (Assoc (t (String Space)))
+                 (Assoc (t (String Str)) (c (String def)))))))))
+           (List (List (Assoc (t (String Str)) (c (String bar))))
+            (List
+             (List
+              (Assoc (t (String Plain))
+               (c (List (Assoc (t (String Str)) (c (String abc)))))))))))))))) |}]
+;;
+
+let%expect_test "blockquote ast" =
+  {|
+> a
+> b
+> c
+> 
+>> foo bar
+>> baz 
+> buz
+
+>> abc
+>> def
+         |}
+  |> ast_of_markdown
+  |> Pandoc.of_pandoc_ast_string
+  |> Pandoc.sexp_of_t
+  |> print_s;
+  [%expect
+    {|
+    ((api_version (1 22 1)) (meta (Assoc))
+     (blocks
+      ((Blockquote
+        ((Para (Str a) (UnhandledInline SoftBreak) (Str b)
+          (UnhandledInline SoftBreak) (Str c))
+         (Blockquote
+          ((Para (Str foo) Space (Str bar) (UnhandledInline SoftBreak) (Str baz)
+            (UnhandledInline SoftBreak) (Str buz))))))
+       (Blockquote
+        ((Blockquote ((Para (Str abc) (UnhandledInline SoftBreak) (Str def))))))))) |}]
+;;
+
+let%expect_test "fold" =
+  {|
+> a
+> b
+> c
+> 
+>> foo bar
+>> baz 
+> buz
+
+>> abc
+>> def
+         |}
+  |> ast_of_markdown
+  |> Pandoc.of_pandoc_ast_string
+  |> Pandoc.fold
+       ~init:""
+       ~inline:
+         (fun acc -> function
+           | Str s -> acc ^ s
+           | Space -> acc ^ " "
+           | UnhandledInline uh ->
+             (match Pandoc.Inline.Additional.reveal uh with
+             | SoftBreak -> acc ^ "\n"
+             | _ -> acc)
+           | _ -> acc)
+       ~block:(fun acc _ -> acc ^ "\n\n")
+  |> print_endline;
+  [%expect {|
+    a
+    b
+    c
+
+    foo bar
+    baz
+    buz
+
+
+
+
+
+    abc
+    def |}]
+;;
+
+let%expect_test "metadata ast" =
+  {|
+foobar 
+
+---
+from : abc
+to   : def
+---
+
+more 
+         |}
+  |> ast_of_markdown
+  |> Pandoc.of_pandoc_ast_string
+  |> Pandoc.sexp_of_t
+  |> print_s;
+  [%expect
+    {|
+    ((api_version (1 22 1))
+     (meta
+      (Assoc
+       (from
+        (Assoc (t (String MetaInlines))
+         (c (List (Assoc (t (String Str)) (c (String abc)))))))
+       (to
+        (Assoc (t (String MetaInlines))
+         (c (List (Assoc (t (String Str)) (c (String def)))))))))
+     (blocks ((Para (Str foobar)) (Para (Str more))))) |}]
+;;
+
 let%expect_test "big ast" =
   big_example
   |> ast_of_markdown
@@ -155,6 +306,28 @@ let%expect_test "big ast" =
         ((Plain (Str back) Space (Str out) (UnhandledInline SoftBreak) (Str this)
           Space (Str one) Space (Str has) (UnhandledInline SoftBreak) (Str some)
           Space (Str overhang))))))) |}]
+;;
+
+let%expect_test "div ast" =
+  {|
+
+test 
+
+:::{}
+# h1
+:::
+
+after|}
+  |> ast_of_markdown
+  |> Pandoc.of_pandoc_ast_string
+  |> Pandoc.sexp_of_t
+  |> print_s;
+  [%expect
+    {|
+    ((api_version (1 22 1)) (meta (Assoc))
+     (blocks
+      ((Para (Str test)) (Div ("" () ()) ((Header 1 (h1 () ()) ((Str h1)))))
+       (Para (Str after))))) |}]
 ;;
 
 let%expect_test "more bullets ast" =
